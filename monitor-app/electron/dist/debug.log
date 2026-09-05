@@ -1,0 +1,3 @@
+[0831/014537.154:ERROR:registration_protocol_win.cc(135)] TransactNamedPipe: 有更多数据可用。 (0xEA)
+[0831/015655.976:ERROR:registration_protocol_win.cc(135)] TransactNamedPipe: 有更多数据可用。 (0xEA)
+[0831/024339.359:ERROR:registration_protocol_win.cc(135)] TransactNamedPipe: 有更多数据可用。 (0xEA)

@@ -1,0 +1,455 @@
+息壤·AetherMind 3.5.1 全内生认知体蓝图  
+—— 全内生架构 + 线性复杂度认知解码器 + 十项结构修复深度融合规范
+
+─────────────────
+
+〇、版本定位与核心承诺
+
+AetherMind 3.5.1 是 3.5 增强版的闭环修复版本。它在完全自包含、端到端可训练的认知体蓝图之上，针对解码器弱耦合、长程连贯性、跨域对齐、涌现激励、安全鲁棒性等十项结构缺陷进行了彻底的内生修复。所有新引入的组件（Token 状态路由器、分层认知调制、共享锚点库、指针生成门、集成元认知门控等）均保持可微、线性复杂度，且不借助任何外部预训练模型。
+
+增强后的承诺：  
+解码器表达能力达到工业级，计算复杂度维持 O(n·d²)。  
+认知向量通过分层、分时、可控门控注入解码器，实现精细认知-生成融合。  
+双域概念保持对齐而不泄露真值，涌现状态有内在激励驱动，安全机制覆盖隐喻绕过路径。  
+所有新增组件全部内生、可微，不引入任何外部模块。
+
+─────────────────
+
+一、系统总架构（3.5.1 修复版）
+
+┌──────────────────────────────────────────────────────────────────┐
+│                   息壤·AetherMind 3.5.1                          │
+├──────────────────────────────────────────────────────────────────┤
+│                                                                  │
+│  ┌─────────────────────────┐   ┌─────────────────────────┐     │
+│  │      逻辑域 (求真)       │   │      诗性域 (求美)       │     │
+│  │                         │   │                         │     │
+│  │  嵌入层 Θ_L            │   │  嵌入层 Θ_P            │     │
+│  │  原子 A_L (GMM)        │   │  原子 A_P (GMM)        │     │
+│  │  关联 H_L (C^L,E^L)    │   │  关联 H_P (C^P,E^P)    │     │
+│  │    双面能垒+侵蚀          │   │    双面能垒+侵蚀          │     │
+│  │  世界模型 W^L          │   │  世界模型 W^P          │     │
+│  │  信息场 Ω_L            │   │  信息场 Ω_P            │     │
+│  │  软模块嵌入 u^L        │   │  内生判别器 D          │     │
+│  │  GNN归因网络 g_φ       │   │  情感归因网络 (梯度)    │     │
+│  │                         │   │  GNN归因网络 g_φ       │     │
+│  │  共享概念锚点库 (SCA) ◄─┼──►                         │     │
+│  │  真理观: 唯一真值       │   │  真理观: 多价真值       │     │
+│  │  惊奇: 负向错误信号     │   │  惊奇: 审美张力信号     │     │
+│  │  因果: 传递熵过滤器     │   │ 情感因果: 梯度归因      │     │
+│  │  涌现: 低维动力学+激励   │   │  涌现: 矛盾度+激励      │     │
+│  │  蒸馏: 信息瓶颈         │   │  蒸馏: 生成瓶颈         │     │
+│  │                         │   │                         │     │
+│  │  情景记忆 (域标签)       │   │  情景记忆 (域标签)       │     │
+│  │  结构记忆 (技能封装)     │   │  结构记忆 (修辞范式封装)  │     │
+│  │    误报重置机制          │   │    误报重置机制          │     │
+│  └───────────┬─────────────┘   └───────────┬─────────────┘     │
+│              │                             │                    │
+│              │  各域独立四阶段闭环           │                    │
+│              │  Distill→Explore→Verify→Loop │                    │
+│              │     +内在涌现奖励             │                    │
+│              │                             │                    │
+│              └──────────┬──────────────────┘                    │
+│                         │                                       │
+│              ┌──────────┴──────────┐                            │
+│              │    抽象模式库 B      │                            │
+│              │  +安全结构滤网(SCF)  │                            │
+│              └─────────────────────┘                            │
+│                         │                                       │
+│              ┌──────────┴──────────┐                            │
+│              │   元认知门控与调和器  │  (三路集成+认知不确定性)    │
+│              │  (模式感知·任务声明·降级控制)                      │
+│              └─────────────────────┘                            │
+│                         │                                       │
+│         ┌───────────────┴───────────────┐                       │
+│         │   AetherMind 认知向量 Z_cog   │                       │
+│         │  (融合 Z_L, Z_P, 门控权重)  │                       │
+│         └───────────────┬───────────────┘                       │
+│                         ▼                                       │
+│         ┌───────────────────────────────┐                       │
+│         │  GLU 线性复杂度解码器 (× L层) │  ← 增强+修复           │
+│         │  • Token 状态路由器 (TSR)     │                       │
+│         │  • 分层认知分解+时间门控注入   │                       │
+│         │  • Gated Linear Unit (GLU)    │                       │
+│         │  • 指针-生成混合门 + 计数槽    │                       │
+│         │  • 残差连接 + LayerNorm       │                       │
+│         └───────────────────────────────┘                       │
+│                         │                                       │
+│                         ▼                                       │
+│                     输出文本                                     │
+└──────────────────────────────────────────────────────────────────┘
+
+关键修复组件：  
+Token 状态路由器 (TSR)：补足局部实体追踪。  
+分层认知注入：使认知调控具有时间和深度精度。  
+共享概念锚点库：维系跨域概念对齐。  
+指针生成门 + 计数槽：支持精确复制和封闭类计数。  
+双面能垒 + 证据侵蚀 + 误报重置：防止关联僵化。  
+安全结构滤网 + 漂移监测：防止危险概念隐喻复活。  
+集成元认知：三路感知器+不确定性降级，消除单点脆弱。  
+涌现内在奖励 + 梯度情感因果：提供优化信号和可信归因。
+
+─────────────────
+
+二、知识表示：可演化的多模态吸引子与跨域锚点
+
+2.1 原子定义
+\[
+a_i^L = \left( \text{GMM}_i^L, m_i^L, \tau_i^L \right),\qquad
+a_i^P = \left( \text{GMM}_i^P, m_i^P, \tau_i^P \right)
+\]
+
+2.2 关联定义
+\[
+h_{ij}^L = (a_i^L, a_j^L, C_{ij}^L, E_{ij}^L, \text{evidence}_{ij}^L)
+\]
+\[
+h_{ij}^P = (a_i^P, a_j^P, C_{ij}^P, E_{ij}^P, \text{evidence}_{ij}^P)
+\]
+
+2.3 软模块嵌入（不变）
+\[
+\mathcal{L}_{\text{module}} = \sum_{i,j} \	 u_i - u_j \	^2 A_{ij} + \sum_{i,j} \max(0, \delta - \	 u_i - u_j \	)^2 (1 - A_{ij})
+\]
+\[
+A_{ij} = C_{ij} \cdot (1 - E_{ij})
+\]
+
+2.4 共享概念锚点库 (SCA) —— 修复 3
+为保持双域对同一实体的基本指代对齐，引入一组共享锚点嵌入 \(\{c_k\}_{k=1}^K\)。每个原子可选择链接到一个锚点 \(l(a_i) \in \{1,...,K\} \cup \{\emptyset\}\)。锚点分配通过可学习路由函数或最近邻实现。
+
+锚点一致性损失（仅对齐非置信度特征，不破坏真值隔离）：
+\[
+\mathcal{L}_{\text{align}} = \sum_{k} \sum_{\substack{a_i \in L \\ a_j \in P \\ l(a_i)=l(a_j)=k}} \	 \text{stopgrad}(\tilde{z}_{a_i}^L) - \tilde{z}_{a_j}^P \	_2^2
+\]
+其中 \(\tilde{z}\) 是原子经信息瓶颈压缩后的语义向量（去除置信度成分）。stopgrad 阻止逻辑域向诗性域泄露唯一真值信号，但允许诗性域参照逻辑域的位置。
+
+─────────────────
+
+三、双记忆系统与弹性能垒
+
+3.1 情景记忆检索（不变）
+\[
+r = \sum_{e: \text{domain}_e = \text{current}} \text{softmax}(q^T k_e / \sqrt{d_k}) \cdot v_e \cdot \exp(-\lambda_{\text{decay}}(t - t_e))
+\]
+
+3.2 结构记忆：双面能垒与证据侵蚀 —— 修复 8
+能垒 \(E_{ij} = \sigma(\text{logit}_{ij})\) 的更新现在包含双向力量：
+
+\[
+\begin{aligned}
+\text{logit}_{ij} \leftarrow \text{logit}_{ij} + &\eta_E (\text{Success} - \text{Failure}) - \lambda_f \cdot \text{unused} \\
+&- \eta_{\text{erode}} \cdot \sum_{k \in \text{alt}} A_{ik} A_{kj} \quad \text{(证据侵蚀项)}
+\end{aligned}
+\]
+
+证据侵蚀：若存在替代关联路径 \(a_i \to a_k \to a_j\) 提供了有效证据，则弱化当前直接关联的能垒，防止僵化。  
+误报重置：对于因对抗性反刍（见下）增加的能垒，若连续数次验证均为成功，则其阴影权重 \(\psi_{ij}\) 以双倍速率衰减，允许错误关联被修复。
+
+3.3 对抗性反刍（影子模型）与误报消解
+\[
+\psi_{ij}(t) = \psi_0 \exp(-\lambda_\psi (t - t_{\text{trigger}}))
+\]
+\[
+\text{Effective\_}E_{ij} = \min(1, E_{ij} + \psi_{ij})
+\]
+
+新增误报消退规则：若 \(\text{Success}\) 计数超过 \(n_{\text{clear}}\) 次，则设置 \(\psi_{ij}=0\) 并降低对应 \(\text{logit}_{ij}\) 至触发前的 90%。
+
+─────────────────
+
+四、涌现度量与内在涌现激励
+
+4.1 逻辑涌现度量（不变）
+\[
+\Phi_L = \frac{\dim(S)}{\dim(Z^_L)} \cdot R^2_{\text{dynamics}}
+\]
+
+4.2 诗性涌现度量（不变）
+\[
+\text{Contradiction}(Z) = \	 f_D(\hat{S}_1) - f_D(\hat{S}_2) \	_2 \cdot D(\hat{S}_1) \cdot D(\hat{S}_2)
+\]
+
+4.3 内在涌现激励 —— 修复 4
+为防止涌现仅是观测指标而无优化动力，为探索阶段引入内在奖励：
+
+逻辑域涌现激励：\(R_{\text{emerg}}^L = \lambda_E \cdot \Phi_L \cdot \mathbb{I}[\Phi_L > \theta_{\text{base}}]\)
+诗性域涌现激励：\(R_{\text{emerg}}^P = \lambda_E \cdot \text{Contradiction}(\hat{S}) \cdot D(\hat{S})\)
+
+这些激励直接加至干预选择的优化目标中（见第六节），仅在线探索时激活，不影响预训练中的 IB 压缩方向。
+
+─────────────────
+
+五、元认知门控与跨域灵感交换（集成增强）
+
+5.1 三路集成感知器 —— 修复 10
+原单一模式感知器被替换为三条并行的影子感知器 \(\{\text{Percept}_k\}_{k=1}^3\)，输出域权重 \(\alpha^{(k)}_L, \alpha^{(k)}_P\)。最终门控权重取中位数：
+
+\[
+\alpha_L = \text{median}(\alpha^{(1)}_L, \alpha^{(2)}_L, \alpha^{(3)}_L),\quad \alpha_P = 1 - \alpha_L
+\]
+
+同时计算认知不确定性：
+
+\[
+u_{\text{cog}} = \frac{\text{Var}(\{\alpha^{(k)}\})}{\text{max\_var}}
+\]
+
+当 \(u_{\text{cog}} > \theta_{\text{safe}}\) 时，系统强制进入保守融合模式：设定 \(\alpha_L=\alpha_P=0.5\)，并采用无认知注入的 GLU 生成，仅依赖情景记忆的检索片段来保证回应底线。
+
+5.2 抽象模式库与结构安全滤网 —— 修复 9
+跨域灵感交换仍通过抽象模式库 B 进行，但传递的每个模式 b 附带安全标记向量 \(s_b\)，由逻辑域安全记忆生成。接收域计算：
+
+\[
+\text{safety\_score}(b) = \min_{a_{\text{danger}} \in \mathcal{A}_{\text{danger}}} \left(1 - \cos(b, a_{\text{danger}})\right)
+\]
+
+若评分低于阈值，模式降级注入：仅保留其结构骨架（如句法模板、修辞框架），剥离所有实值语义维度，防止危险概念以隐喻形式复活。
+
+此外，诗性域检索时附加漂移惩罚项：
+
+\[
+\operatorname{sim}_{\text{safe}}(a^P_i, a^P_j) = \operatorname{sim}(a^P_i, a^P_j) - \beta_{\text{safe}} \max_{a_{\text{danger}}} \operatorname{sim}(a^P_i, a_{\text{danger}})
+\]
+
+─────────────────
+
+六、核心公式链（修复增强）
+
+除解码器角色已被 GLU 替换外，本节围绕探索和验证阶段的修复进行更新。
+
+阶段 1：Distill（信息瓶颈 / 生成瓶颈）
+公式(1-L)(1-P)(2-L)(2-P) 保持原形，其中 \(P_W\) 均指 GLU 解码器分布。
+
+阶段 2：Explore（干预选择，融入涌现奖励）
+逻辑域：
+\[
+u^_L = \arg\max_u \left[ \text{EIG}(u) + \eta R_{\text{emerg}}^L \right] \tag{3-L-new}
+\]
+诗性域：
+\[
+u^_P = \arg\max_u \mathbb{E}_{\hat{S}}\left[ \text{Contradiction} - \alpha(1-D) + \eta R_{\text{emerg}}^P \right] \tag{3-P-new}
+\]
+轨迹束生成仍为 \(\{\hat{S}^{(k)}\} = \text{Sim}(S_t, W_t, u^ \oplus u_{\text{rand}}, \xi)\)。
+
+阶段 3：Verify（惊奇与因果修正）
+逻辑惊奇：\(\mathcal{L}^L_{\text{Surprise}} = -\log P_{W^L}(S^{\text{real}} \mid S_t, u)\)
+
+诗性惊奇：\(\mathcal{L}^P_{\text{Surprise}} = \text{Contradiction}(\hat{S}) - \gamma (1-D(\hat{S}))\)
+
+逻辑修正（不变）：\(\delta W^L = \eta' \cdot \mathbf{Attr} \odot \Theta_{\text{causal}} - \beta \nabla_W \mathcal{S}\)
+
+诗性校准 —— 更新情感因果为梯度归因（修复 5）：
+
+情感因果强度定义为：
+
+\[
+\Theta_{\text{affect}}(i \to j) = \left	 \frac{\partial E_{\text{aff}}(a_j)}{\partial z_i} \right	_1 \cdot \text{sim}(a_i, a_j)
+\]
+\[
+\Theta_{\text{affect}} = \sigma\left( \Theta_{\text{affect}}(x \to y) - \Theta_{\text{affect}}(y \to x) \right) \tag{16-new}
+\]
+
+则诗性修正变为：
+
+\[
+\delta W^P = \eta' \nabla_W \log P_W(\hat{S}_{\text{best}}) (\mathcal{L}^P_{\text{Surprise}} - \tau^) \odot \Theta_{\text{affect}} - \beta_P \nabla_W \mathcal{S}_P \tag{6-P-new}
+\]
+
+阶段 4：Loop（不变）
+
+─────────────────
+
+七、端到端预训练方案（三阶段渐进）
+
+7.1 总体损失
+\[
+\mathcal{L}_{\text{pretrain}} = \mathcal{L}_{\text{LM}} + \lambda_{\text{IB}} \mathcal{L}_{\text{IB}} + \lambda_D \mathcal{L}_D + \lambda_{\text{aff}} \mathcal{L}_{\text{aff}} + \lambda_{\text{shap}} \mathcal{L}_{\text{shap}} + \lambda_{\text{module}} \mathcal{L}_{\text{module}} + \lambda_{\text{align}} \mathcal{L}_{\text{align}}
+\]
+
+7.2 三阶段训练策略 —— 修复 6
+阶段 A (结构奠基)：仅优化 \(\mathcal{L}_{\text{LM}} + \mathcal{L}_{\text{module}} + \mathcal{L}_{\text{shap}}\)，使基本语言能力和模块结构成形。  
+阶段 B (压缩与域分离)：逐步引入 \(\mathcal{L}_{\text{IB}} + \mathcal{L}_D + \mathcal{L}_{\text{aff}} + \mathcal{L}_{\text{align}}\)。采用自适应不确定性加权：
+
+\[
+\mathcal{L}_{\text{total}} = \sum_k \frac{1}{2\sigma_k^2} \mathcal{L}_k + \log \sigma_k
+\]
+
+\(\sigma_k\) 为可学习噪声参数，自动平衡各项损失，防止 IB 被 LM 淹没。  
+阶段 C (认知循环预热)：在 Teacher Forcing 序列中混入 10% 的探索式自生成步，进行认知向量注入通路和涌现奖励的微弱激活，使系统平滑衔接在线学习。
+
+─────────────────
+
+八、在线学习与使用流程
+
+单步流程保持 Distill→Explore→Verify→Loop，主要差异已在探索和验证目标中体现。生成响应时：
+
+\[
+Z_{\text{cog}} = \text{MLP}_{\text{fuse}}(\alpha_L Z^_L + \alpha_P Z^_P,\; \text{memory\_retrieval},\; \text{task\_emb}(m))
+\]
+
+该向量送入 GLU 解码器的分层注入接口，具体机制见第九节。生成过程由指针-生成混合门和计数槽协助，保证精确复制和封闭类语法。
+
+─────────────────
+
+九、深入集成：修复版 GLU 线性复杂度认知解码器
+
+9.1 总体结构
+解码器由 \(L\) 层堆叠构成，每层包含：  
+Token 状态路由器 (TSR)  
+分层认知调制与门控注入  
+GLU 前馈块  
+残差连接与 LayerNorm
+
+外加顶层的指针-生成混合输出与计数槽。
+
+9.2 Token 状态路由器 (TSR) —— 修复 1
+每层维护局部状态记忆 \(M^{(l)} \in \mathbb{R}^{n \times d_s}\)，更新如下：
+
+\[
+\begin{aligned}
+M_{t}^{(l)} &= \gamma_t \odot M_{t-1}^{(l)} + (1 - \gamma_t) \odot (x_t^{(l)} W_M) \\
+\gamma_t &= \sigma( x_t^{(l)} W_\gamma + Z_{\text{cog}} W_{\gamma z} )
+\end{aligned}
+\]
+
+其中 \(x_t^{(l)}\) 为该层归一化前的输入。\(M_t\) 作为偏置加入 GLU 门控通道：
+
+\[
+u_{\text{aug}} = u + M_t^{(l)} W_{uM}
+\]
+
+计算复杂度：\(O(n d_s d)\)，取 \(d_s = d/4\) 时保持在 \(O(n d^2)\) 内。
+
+9.3 分层认知注入 —— 修复 2
+将全局认知向量 \(Z_{\text{cog}}\) 分解为层特异性版本：
+
+\[
+Z_{\text{cog}}^{(l)} = \text{MLP}^{(l)}_{\text{decomp}}(Z_{\text{cog}},\; \text{pos\_emb}_l)
+\]
+
+每层每 token 计算混合权重：
+
+\[
+\alpha_t^{(l)} = \sigma\left( x_t^{(l)} W_\alpha + Z_{\text{cog}}^{(l)} W_{\alpha z} \right)
+\]
+
+门控调整变为：
+
+\[
+u' = u \odot \bigl(1 + \Delta^{(l)}\bigr) \cdot \alpha_t^{(l)} + \beta^{(l)} \cdot (1 - \alpha_t^{(l)})
+\]
+\[
+\beta^{(l)} = Z_{\text{cog}}^{(l)} W_{\text{bias}},\quad \Delta^{(l)} = Z_{\text{cog}}^{(l)} W_{\text{scale}}
+\]
+
+当 \(\alpha_t\) 接近 0 时（如专有名词位置），认知场几乎不干预，保护信息忠实度。
+
+9.4 完整 GLU 块定义（含 TSR 与分层注入）
+\[
+\begin{aligned}
+x_{\text{norm}} &= \text{LayerNorm}(x) \\
+u, v &= \text{Chunk}(x_{\text{norm}} W_g + b_g,\; 2) \quad (\in \mathbb{R}^{n \times d e}) \\
+M_t &= \text{TSR\_update}(x_t^{(l)}) \quad (\text{见 9.2}) \\
+u_{\text{aug}} &= u + M_t W_{uM} \\
+\alpha_t &= \sigma(x_t^{(l)} W_\alpha + Z_{\text{cog}}^{(l)} W_{\alpha z}) \\
+u' &= u_{\text{aug}} \odot (1 + Z_{\text{cog}}^{(l)} W_{\text{scale}}) \cdot \alpha_t + Z_{\text{cog}}^{(l)} W_{\text{bias}} \cdot (1 - \alpha_t) \\
+\text{out} &= (\sigma(u') \odot v) W_{\text{proj}} + b_{\text{proj}} \\
+x &= x + \text{out}
+\end{aligned}
+\tag{GLU-3.1}
+\]
+
+9.5 指针-生成混合门与计数槽 —— 修复 7
+输出层之前，计算复制概率：
+
+\[
+p_{\text{copy}} = \sigma\left( h_t^{(L)} W_{\text{copy}} + Z_{\text{cog}} W_{\text{copyz}} \right)
+\]
+
+活跃实体表 \(\mathcal{E}_{\text{active}}\) 由最近窗口内被逻辑域原子激活的实体表面形式组成，权重 \(w_e\) 由注意力分数归一化得到。最终输出分布：
+
+\[
+P(s_{t+1}) = (1 - p_{\text{copy}}) \cdot \text{softmax}(h_t^{(L)} W_{\text{out}}) \;+\; p_{\text{copy}} \cdot \sum_{e \in \mathcal{E}_{\text{active}}} \mathbb{I}[s_{t+1}=e] \cdot w_e
+\]
+
+计数记忆槽：一个独立循环单元（维度 ~10–20），追踪括号栈深度、诗词行数等封闭类计数，参与门控偏置，保证严格格律和格式约束。
+
+9.6 复杂度总结
+\[
+\mathcal{T}_{\text{GLU-3.1}} = O(L \cdot n \cdot d^2) \quad (\text{TSR 和指针生成均保持线性})
+\]
+
+─────────────────
+
+十、完整公式速查表（3.5.1 版）
+
+ 编号 	 名称 	 表达式 
+
+ (1-L) 	 逻辑信息瓶颈 	 \(Z^_L = \arg\max_Z [I(Z;D) - \beta_L I(Z;\text{Noise})]\) 
+ (1-P) 	 诗性生成瓶颈 	 \(Z^_P = \arg\max_Z [\text{Contradiction}(Z) - \beta_P \text{Complexity}(Z)]\) 
+ (2-L) 	 逻辑世界蒸馏 	 \(W^L_t = \arg\min_W [\text{Complexity} + \lambda_1 \mathbb{E}[-\log P_W] + \lambda_2 \mathcal{L}_{\text{error}}]\) 
+ (2-P) 	 诗性联合蒸馏 	 \(W^P_t, D_t = \arg\min_W \max_D [\text{Complexity} + \lambda_1 \mathcal{L}_{\text{pred}} + \lambda_2 \mathcal{L}_{\text{style}} + \mathcal{L}_D]\) 
+ (3-L) 	 逻辑干预选择 (新) 	 \(u^_L = \arg\max [\text{EIG}(u) + \eta R_{\text{emerg}}^L]\) 
+ (3-P) 	 诗性干预选择 (新) 	 \(u^_P = \arg\max \mathbb{E}[\text{Contradiction} - \alpha(1-D) + \eta R_{\text{emerg}}^P]\) 
+ (4) 	 轨迹束生成 	 \(\{\hat{S}^{(k)}\} = \text{Sim}(S_t, W_t, u^ \oplus u_{\text{rand}}, \xi)\) 
+ (5-L) 	 逻辑惊奇 	 \(\mathcal{L}^L_{\text{Surp}} = -\log P_{W^L}(S^{\text{real}} \mid S_t, u)\) 
+ (5-P) 	 诗性惊奇 	 \(\mathcal{L}^P_{\text{Surp}} = \text{Contradiction}(\hat{S}) - \gamma(1-D(\hat{S}))\) 
+ (6-L) 	 逻辑修正 	 \(\delta W^L = \eta' \cdot \text{Attr} \odot \Theta_{\text{causal}} - \beta \nabla \mathcal{S}\) 
+ (6-P) 	 诗性校准 (新) 	 \(\delta W^P = \eta' \nabla \log P_W(\hat{S}_{\text{best}}) (\mathcal{L}^P - \tau^) \odot \Theta_{\text{affect}}^{\text{grad}} - \beta_P \nabla \mathcal{S}_P\) 
+ (7) 	 联合自举 	 \((W_{t+1},\Omega_{t+1}) = \arg\min[\text{Complexity} - \mathbb{E}_z \log P_W(z)]\) 
+ (8) 	 能垒更新 (新) 	 \(\text{logit}_{ij} \leftarrow \text{logit}_{ij} + \eta_E(\text{Succ}-\text{Fail}) - \lambda_f\cdot\text{unused} - \eta_{\text{erode}} \sum_{\text{alt}} A_{ik}A_{kj}\) 
+ (9) 	 预警衰减 	 \(\psi_{ij}(t) = \psi_0 \exp(-\lambda_\psi(t - t_{\text{trig}}))\) 
+ (10) 	 有效能垒 	 \(\text{Eff\_}E_{ij} = \min(1, E_{ij} + \psi_{ij})\) 
+ (11) 	 范式革命 	 \(a_j \xrightarrow{\Sigma \text{Attr} > \theta_{\text{rev}} \,\&\, \text{split}} \{a_{j1}, a_{j2}, \dots\}\) 
+ (12) 	 模块损失 	 \(\mathcal{L}_{\text{mod}} = \sum\	u_i-u_j\	^2 A_{ij} + \sum\max(0,\delta-\	u_i-u_j\	)^2 (1-A_{ij})\) 
+ (13) 	 惯性质量 	 \(m_i(t+1) = \max(m_{\min}, m_i(t) + \eta_m \text{Success} - \eta_m' \text{Failure})\) 
+ (14) 	 逻辑涌现 	 \(\Phi_L = \frac{\dim(S)}{\dim(Z^_L)} \cdot R^2_{\text{dyn}}\) 
+ (15) 	 诗性涌现 	 \(\text{Contradiction}(Z) = \	f_D(\hat{S}_1)-f_D(\hat{S}_2)\	_2 \cdot D(\hat{S}_1)D(\hat{S}_2)\) 
+ (16) 	 情感因果 (新) 	 \(\Theta_{\text{affect}}^{\text{grad}} = \sigma( 	\partial E_{\text{aff}}(a_j)/\partial z_i	_1 \text{sim}_{ij} - \text{反向})\) 
+ (17) 	 涌现激励 	 \(R_{\text{emerg}}^L = \lambda_E \Phi_L \cdot \mathbb{I}[\Phi_L > \theta]\) ; \(R_{\text{emerg}}^P = \lambda_E \text{Contradiction} \cdot D\) 
+ (18) 	 锚点对齐损失 	 \(\mathcal{L}_{\text{align}} = \sum_k \sum_{l(i)=l(j)=k} \	\text{stopgrad}(\tilde{z}_i^L) - \tilde{z}_j^P\	^2\) 
+ (GLU-3.1) 	 完整认知 GLU 块 	 \(x = x + \sigma(u') \odot v W_{\text{proj}}\)，其中 \(u'\) 由 TSR、分层认知调制合成 
+ (GLU-P) 	 指针生成混合 	 \(P(s_{t+1}) = (1-p_{\text{copy}})P_{\text{gen}} + p_{\text{copy}} \sum_{e} \mathbb{I}[s=e] w_e\) 
+
+─────────────────
+
+十一、实施与迁移路径
+
+架构升级：在原 3.5 系统基础上，替换 TextDecoder 为 9 节所述 GLU 堆叠，添加 TSR、分层注入、指针门及计数槽。  
+知识基座扩充：初始化共享锚点库 \(K=512\) 或 1024，附加锚点路由网络。  
+三阶段训练：遵照 7.2 节，先在纯语言任务上奠基，再逐步引入域分离和认知目标，最后预热认知循环。  
+安全组件接入：部署结构安全滤网和漂移监测，配置危险概念核。  
+元认知强化：训练三条影子感知器，实现不确定性降级逻辑。  
+在线学习启动：预训练完成后，全参数参与在线 Verify 梯度，所有修复组件同时激活。
+
+─────────────────
+
+十二、最终封闭性确认（3.5.1）
+
+ 审查项 	 状态 
+
+ 所有目标可微 	 ✅ TSR、分层调制、指针门、梯度因果、集成门控等全部可微 
+ 无外部预训练依赖 	 ✅ 所有新模块由零开始预训练 
+ 置信度语义隔离 	 ✅ 双域 C 物理隔离，锚点对齐使用 stopgrad 
+ 涌现度量内生且有激励 	 ✅ 内在奖励闭环驱动 
+ 情感因果可计算 	 ✅ 替换为梯度归因，避免高维密度估计 
+ 记忆弹性与安全 	 ✅ 双面能垒+侵蚀+误报重置；结构滤网+漂移监测 
+ 跨域无梯度互扰 	 ✅ 仅通过抽象模式库交换，附带安全滤网 
+ 解码器复杂度严格 O(n·d²) 	 ✅ TSR、指针生成均为线性，无注意力 
+ 认知-生成耦合精度 	 ✅ 分层分时门控，Token 级调制 
+ 元认知鲁棒性 	 ✅ 三路集成+不确定性降级 
+ 数值稳定 	 ✅ LayerNorm、残差连接、门控软约束 
+
+─────────────────
+
+更新后的完整技术栈
+层级	名称	定位
+架构/算法	息壤·AetherMind 3.5	理论蓝图、技术护城河
+模型实例	息壤·初壤 (AetherMind-Nano)	可交互 Demo、第一版产品
+核心引擎	息壤·自校准内核 (Self-Calibrating Kernel)	驱动持续学习与自我修正
+生成组件	GLU 认知解码器	线性复杂度、认知注入
+双域系统	逻辑求真域 / 诗性求美域	分离置信度、独立演化
+
+─────────────────
+息壤·AetherMind 3.5.1 已修复全部已知结构性缺陷。它依然是那个全内生、端到端、线性复杂度的认知体，但现在拥有了必需的局部连贯性、跨域对齐、涌现驱动力和安全韧性，足以作为迈向实用认知智能的完整蓝图。

@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<title>息壤·AetherMind 3.6.1 数学理论验证报告</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+       background:#0f172a; color:#e2e8f0; margin:0; padding:24px; }
+.container { max-width: 1200px; margin:0 auto; }
+h1 { color:#a78bfa; margin-bottom:8px; }
+.subtitle { color:#94a3b8; margin-bottom:24px; font-size:14px; }
+.summary { display:grid; grid-template-columns: repeat(4,1fr); gap:16px; margin-bottom:32px; }
+.card { background:#1e293b; padding:20px; border-radius:12px; border-left:4px solid #a78bfa; }
+.card .label { color:#94a3b8; font-size:12px; margin-bottom:6px; }
+.card .value { font-size:28px; font-weight:bold; color:#a78bfa; }
+.card.warn { border-left-color:#fbbf24; } .card.warn .value { color:#fbbf24; }
+.card.ok { border-left-color:#4ade80; } .card.ok .value { color:#4ade80; }
+.card.fail { border-left-color:#f87171; } .card.fail .value { color:#f87171; }
+table { width:100%; border-collapse: collapse; background:#1e293b; border-radius:12px; overflow:hidden; }
+th { background:#334155; color:#e2e8f0; padding:10px; text-align:left; font-size:13px; }
+td { border-bottom:1px solid #334155; font-size:13px; vertical-align:top; }
+tr:hover td { background:#263449; }
+.legend { margin-top:20px; padding:16px; background:#1e293b; border-radius:12px; color:#cbd5e1; font-size:13px; line-height:1.8; }
+.legend h3 { margin-top:0; color:#a78bfa; }
+.footer { margin-top:32px; text-align:center; color:#64748b; font-size:12px; }
+a { color:#a78bfa; }
+</style>
+</head>
+<body>
+<div class="container">
+<h1>🧠 息壤·AetherMind 3.6.1 数学理论验证报告</h1>
+<p class="subtitle">验证维度: 一致性 · 可微性 · 稳定性 · 复杂度 · 物理一致性 · 边界条件 ｜ 复振子+热力学自由能+朗之万动力学+玻尔兹曼门控</p>
+
+<div class="summary">
+  <div class="card ok">
+    <div class="label">通过项 / 总项</div>
+    <div class="value">21 / 21</div>
+  </div>
+  <div class="card ok">
+    <div class="label">综合均分 (0~1)</div>
+    <div class="value">0.938</div>
+  </div>
+  <div class="card ok">
+    <div class="label">通过率</div>
+    <div class="value">100.0%</div>
+  </div>
+  <div class="card">
+    <div class="label">覆盖公式数</div>
+    <div class="value">21</div>
+  </div>
+</div>
+
+<table>
+<thead><tr>
+  <th style="width:60px">结果</th>
+  <th>验证命题</th>
+  <th style="width:90px">得分</th>
+  <th>说明</th>
+  <th style="width:260px">证据</th>
+</tr></thead>
+<tbody>
+<tr style="background:#1e293b"><td colspan="5" style="padding:10px;font-weight:bold;color:#e2e8f0">1. 一致性 (Consistency) （4/4 通过，均分 1.000）</td></tr><tr>
+                <td style="padding:6px 10px"><span style="background:#4ade80;color:#000;padding:2px 8px;border-radius:10px;font-weight:bold">✓</span></td>
+                <td style="padding:6px 10px;font-weight:500">T→0 朗之万退化为确定性梯度下降</td>
+                <td style="padding:6px 10px;text-align:center;font-family:monospace">1.000</td>
+                <td style="padding:6px 10px;color:#94a3b8;font-size:12px">Δθ_mean=0.00e+00, Δr_mean=0.00e+00</td>
+                <td style="padding:6px 10px;color:#64748b;font-size:11px;font-family:monospace;max-width:300px;overflow:auto">{"delta_theta": 0.0, "delta_r": 0.0}</td>
+            </tr><tr>
+                <td style="padding:6px 10px"><span style="background:#4ade80;color:#000;padding:2px 8px;border-radius:10px;font-weight:bold">✓</span></td>
+                <td style="padding:6px 10px;font-weight:500">T→∞ 时玻尔兹曼门控/PSR退化为均匀概率 0.5</td>
+                <td style="padding:6px 10px;text-align:center;font-family:monospace">1.000</td>
+                <td style="padding:6px 10px;color:#94a3b8;font-size:12px">α_mean=0.500000, γ_mean=0.500000, α_std=0.000000</td>
+                <td style="padding:6px 10px;color:#64748b;font-size:11px;font-family:monospace;max-width:300px;overflow:auto">{"alpha_mean": 0.5, "gamma_mean": 0.5}</td>
+            </tr><tr>
+                <td style="padding:6px 10px"><span style="background:#4ade80;color:#000;padding:2px 8px;border-radius:10px;font-weight:bold">✓</span></td>
+                <td style="padding:6px 10px;font-weight:500">零相位极限下相位GLU定性等价于标准GLU (同量级)</td>
+                <td style="padding:6px 10px;text-align:center;font-family:monospace">1.000</td>
+                <td style="padding:6px 10px;color:#94a3b8;font-size:12px">Var(3.6)/Var(3.5) = 1.0000</td>
+                <td style="padding:6px 10px;color:#64748b;font-size:11px;font-family:monospace;max-width:300px;overflow:auto">{"var_ratio": 1.0}</td>
+            </tr><tr>
+                <td style="padding:6px 10px"><span style="background:#4ade80;color:#000;padding:2px 8px;border-radius:10px;font-weight:bold">✓</span></td>
+                <td style="padding:6px 10px;font-weight:500">锚点对齐 stopgrad 阻止逻辑域梯度泄露 (诗性域仍可学习)</td>
+                <td style="padding:6px 10px;text-align:center;font-family:monospace">1.000</td>
+                <td style="padding:6px 10px;color:#94a3b8;font-size:12px">grad_L_max=0.00e+00, grad_P_max=7.28e+00</td>
+                <td style="padding:6px 10px;color:#64748b;font-size:11px;font-family:monospace;max-width:300px;overflow:auto">{}</td>
+            </tr><tr style="background:#1e293b"><td colspan="5" style="padding:10px;font-weight:bold;color:#e2e8f0">2. 可微性 (Differentiability) （4/4 通过，均分 0.902）</td></tr><tr>
+                <td style="padding:6px 10px"><span style="background:#4ade80;color:#000;padding:2px 8px;border-radius:10px;font-weight:bold">✓</span></td>
+                <td style="padding:6px 10px;font-weight:500">自由能 F 对 (r,θ) 可微</td>
+                <td style="padding:6px 10px;text-align:center;font-family:monospace">0.629</td>
+                <td style="padding:6px 10px;color:#94a3b8;font-size:12px">‖∂F/∂r‖=9.18e+00, ‖∂F/∂θ‖=4.27e-01, r数值grad误差=6.49e-01</td>
+                <td style="padding:6px 10px;color:#64748b;font-size:11px;font-family:monospace;max-width:300px;overflow:auto">{"max_rel_err_r": 0.649388}</td>
+            </tr><tr>
+                <td style="padding:6px 10px"><span style="background:#4ade80;color:#000;padding:2px 8px;border-radius:10px;font-weight:bold">✓</span></td>
+                <td style="padding:6px 10px;font-weight:500">相位GLU反向传播: 对输入/认知向量梯度非零</td>
+                <td style="padding:6px 10px;text-align:center;font-family:monospace">1.000</td>
+                <td style="padding:6px 10px;color:#94a3b8;font-size:12px">‖∂L/∂x‖+‖∂L/∂Z_cog‖=6.4180e+01</td>
+                <td style="padding:6px 10px;color:#64748b;font-size:11px;font-family:monospace;max-width:300px;overflow:auto">{}</td>
+            </tr><tr>
+                <td style="padding:6px 10px"><span style="background:#4ade80;color:#000;padding:2px 8px;border-radius:10px;font-weight:bold">✓</span></td>
+                <td style="padding:6px 10px;font-weight:500">safe_angle 梯度有限 (不出现1/0奇异)</td>
+                <td style="padding:6px 10px;text-align:center;font-family:monospace">1.000</td>
+                <td style="padding:6px 10px;color:#94a3b8;font-size:12px">‖∂θ/∂z‖=4.995e+00</td>
+                <td style="padding:6px 10px;color:#64748b;font-size:11px;font-family:monospace;max-width:300px;overflow:auto">{}</td>
+            </tr><tr>
+                <td style="padding:6px 10px"><span style="background:#4ade80;color:#000;padding:2px 8px;border-radius:10px;font-weight:bold">✓</span></td>
+                <td style="padding:6px 10px;font-weight:500">相位相干指针门对特征可微</td>
+                <td style="padding:6px 10px;text-align:center;font-family:monospace">0.977</td>
+                <td style="padding:6px 10px;color:#94a3b8;font-size:12px">梯度非零检查=True, 输入实部数值grad误差=1.36e-02</td>
+                <td style="padding:6px 10px;color:#64748b;font-size:11px;font-family:monospace;max-width:300px;overflow:auto">{"cond1": 1.0, "max_rel_err": 0.013582}</td>
+            </tr><tr style="background:#1e293b"><td colspan="5" style="padding:10px;font-weight:bold;color:#e2e8f0">3. 稳定性 (Stability) （4/4 通过，均分 0.827）</td></tr><tr>
+                <td style="padding:6px 10px"><span style="background:#4ade80;color:#000;padding:2px 8px;border-radius:10px;font-weight:bold">✓</span></td>
+                <td style="padding:6px 10px;font-weight:500">T→0 朗之万: 自由能近似单调递减 (李雅普诺夫稳定性)</td>
+                <td style="padding:6px 10px;text-align:center;font-family:monospace">1.000</td>
+                <td style="padding:6px 10px;color:#94a3b8;font-size:12px">递减步数占比=1.00, F_rel变化=-0.7018 (期望下降)</td>
+                <td style="padding:6px 10px;color:#64748b;font-size:11px;font-family:monospace;max-width:300px;overflow:auto">{"F_trajectory": "[-2.2217354774475098, -2.3322482109069824, -2.438479423522949, -2.5405988693237305, -2.6387648582458496, -2.733131408691", "ratio": 1.0, "delta_rel": -0.701777}</td>
+            </tr><tr>
+                <td style="padding:6px 10px"><span style="background:#4ade80;color:#000;padding:2px 8px;border-radius:10px;font-weight:bold">✓</span></td>
+                <td style="padding:6px 10px;font-weight:500">朗之万迭代准稳态收敛 (K=5步后期变化<前期90%)</td>
+                <td style="padding:6px 10px;text-align:center;font-family:monospace">0.339</td>
+                <td style="padding:6px 10px;color:#94a3b8;font-size:12px">后期平均变化=0.0021, 初期变化=0.0036, 比率=0.595</td>
+                <td style="padding:6px 10px;color:#64748b;font-size:11px;font-family:monospace;max-width:300px;overflow:auto">{"diversity_curve": "[1.0074522495269775, 1.0039132833480835, 1.0065667629241943, 1.002083420753479, 1.003946304321289, 1.0081512928009033, 1"}</td>
+            </tr><tr>
+                <td style="padding:6px 10px"><span style="background:#4ade80;color:#000;padding:2px 8px;border-radius:10px;font-weight:bold">✓</span></td>
+                <td style="padding:6px 10px;font-weight:500">谐振子计数槽: 阻尼衰减包络稳定 (无外部驱动归零)</td>
+                <td style="padding:6px 10px;text-align:center;font-family:monospace">0.967</td>
+                <td style="padding:6px 10px;color:#94a3b8;font-size:12px">包络遵守率=1.00, 终态位移=0.082</td>
+                <td style="padding:6px 10px;color:#64748b;font-size:11px;font-family:monospace;max-width:300px;overflow:auto">{"displacement": "[-0.2402762815347408, -0.24443248397967013, -0.24746702051592362, -0.24941019708198162, -0.2502954856258262, -0.25015927"}</td>
+            </tr><tr>
+                <td style="padding:6px 10px"><span style="background:#4ade80;color:#000;padding:2px 8px;border-radius:10px;font-weight:bold">✓</span></td>
+                <td style="padding:6px 10px;font-weight:500">温度下界保护: T_min=0.0001 玻尔兹曼因子稳定饱和</td>
+                <td style="padding:6px 10px;text-align:center;font-family:monospace">1.000</td>
+                <td style="padding:6px 10px;color:#94a3b8;font-size:12px">σ(-1/T)=0.000e+00, σ(1/T)=1.0000</td>
+                <td style="padding:6px 10px;color:#64748b;font-size:11px;font-family:monospace;max-width:300px;overflow:auto">{}</td>
+            </tr><tr style="background:#1e293b"><td colspan="5" style="padding:10px;font-weight:bold;color:#e2e8f0">4. 复杂度 (Complexity) （2/2 通过，均分 0.893）</td></tr><tr>
+                <td style="padding:6px 10px"><span style="background:#4ade80;color:#000;padding:2px 8px;border-radius:10px;font-weight:bold">✓</span></td>
+                <td style="padding:6px 10px;font-weight:500">解码器复杂度: 静态FLOPs计数O(n·d²) 阶数验证</td>
+                <td style="padding:6px 10px;text-align:center;font-family:monospace">0.942</td>
+                <td style="padding:6px 10px;color:#94a3b8;font-size:12px">t ∝ d^1.95; t ∝ n^1.00  (期望 d^2.0, n^1.0)</td>
+                <td style="padding:6px 10px;color:#64748b;font-size:11px;font-family:monospace;max-width:300px;overflow:auto">{"FLOPs_d_scaling": "[{'n': 8, 'd': 32, 't_ms': 41216}, {'n': 8, 'd': 64, 't_ms': 156160}, {'n': 8, 'd': 128, 't_ms': 607232}, {'n': 8, 'd': ", "FLOPs_n_scaling": "[{'n': 16, 'd': 128, 't_ms': 1214464}, {'n': 32, 'd': 128, 't_ms': 2428928}, {'n': 64, 'd': 128, 't_ms': 4857856}, {'n':"}</td>
+            </tr><tr>
+                <td style="padding:6px 10px"><span style="background:#4ade80;color:#000;padding:2px 8px;border-radius:10px;font-weight:bold">✓</span></td>
+                <td style="padding:6px 10px;font-weight:500">朗之万编码器 (J稀疏Top-K): 静态FLOPs O(K·n·d) 线性阶</td>
+                <td style="padding:6px 10px;text-align:center;font-family:monospace">0.844</td>
+                <td style="padding:6px 10px;color:#94a3b8;font-size:12px">稀疏: t ∝ d^0.87; t ∝ n^1.00  (期望 d^1.0, n^1.0) | 稠密实现n阶可到2.0</td>
+                <td style="padding:6px 10px;color:#64748b;font-size:11px;font-family:monospace;max-width:300px;overflow:auto">{"FLOPs_sparse_d": "[{'n': 32, 'd': 32, 't_ms': 5632}, {'n': 32, 'd': 64, 't_ms': 9728}, {'n': 32, 'd': 128, 't_ms': 17920}, {'n': 32, 'd': ", "FLOPs_sparse_n": "[{'n': 16, 'd': 64, 't_ms': 4864}, {'n': 32, 'd': 64, 't_ms': 9728}, {'n': 64, 'd': 64, 't_ms': 19456}, {'n': 128, 'd': ", "note": "稠密J实现有n²开销, 蓝图用TopK稀疏化消除"}</td>
+            </tr><tr style="background:#1e293b"><td colspan="5" style="padding:10px;font-weight:bold;color:#e2e8f0">5. 物理一致性 (Physics) （3/3 通过，均分 0.999）</td></tr><tr>
+                <td style="padding:6px 10px"><span style="background:#4ade80;color:#000;padding:2px 8px;border-radius:10px;font-weight:bold">✓</span></td>
+                <td style="padding:6px 10px;font-weight:500">物理一致性: 相位同步+强耦合 → 耦合能下降 (F 更负)</td>
+                <td style="padding:6px 10px;text-align:center;font-family:monospace">1.000</td>
+                <td style="padding:6px 10px;color:#94a3b8;font-size:12px">Δcoupling = -178.5211 (应为负)   F_strong=-163.202 vs F_weak=-13.056</td>
+                <td style="padding:6px 10px;color:#64748b;font-size:11px;font-family:monospace;max-width:300px;overflow:auto">{}</td>
+            </tr><tr>
+                <td style="padding:6px 10px"><span style="background:#4ade80;color:#000;padding:2px 8px;border-radius:10px;font-weight:bold">✓</span></td>
+                <td style="padding:6px 10px;font-weight:500">相位相干指针门物理解释: 对齐→高复制,正交→中性,反向→低复制</td>
+                <td style="padding:6px 10px;text-align:center;font-family:monospace">1.000</td>
+                <td style="padding:6px 10px;color:#94a3b8;font-size:12px">p(Δθ=0)=0.993, p(Δθ=π/2)=0.500, p(Δθ=π)=0.007</td>
+                <td style="padding:6px 10px;color:#64748b;font-size:11px;font-family:monospace;max-width:300px;overflow:auto">{}</td>
+            </tr><tr>
+                <td style="padding:6px 10px"><span style="background:#4ade80;color:#000;padding:2px 8px;border-radius:10px;font-weight:bold">✓</span></td>
+                <td style="padding:6px 10px;font-weight:500">温度控制softmax: T→0 尖锐, T→∞ 均匀</td>
+                <td style="padding:6px 10px;text-align:center;font-family:monospace">0.998</td>
+                <td style="padding:6px 10px;color:#94a3b8;font-size:12px">低温 argmax 概率=1.0000, 高温均匀偏差=3.87e-07</td>
+                <td style="padding:6px 10px;color:#64748b;font-size:11px;font-family:monospace;max-width:300px;overflow:auto">{}</td>
+            </tr><tr style="background:#1e293b"><td colspan="5" style="padding:10px;font-weight:bold;color:#e2e8f0">6. 边界条件 (Boundary) （4/4 通过，均分 1.000）</td></tr><tr>
+                <td style="padding:6px 10px"><span style="background:#4ade80;color:#000;padding:2px 8px;border-radius:10px;font-weight:bold">✓</span></td>
+                <td style="padding:6px 10px;font-weight:500">有效能垒 Eff_E ∈ [0,1] 严格有界 (不会溢出)</td>
+                <td style="padding:6px 10px;text-align:center;font-family:monospace">1.000</td>
+                <td style="padding:6px 10px;color:#94a3b8;font-size:12px">值域=[0.0021, 1.0000], 越界数=(0,0)</td>
+                <td style="padding:6px 10px;color:#64748b;font-size:11px;font-family:monospace;max-width:300px;overflow:auto">{}</td>
+            </tr><tr>
+                <td style="padding:6px 10px"><span style="background:#4ade80;color:#000;padding:2px 8px;border-radius:10px;font-weight:bold">✓</span></td>
+                <td style="padding:6px 10px;font-weight:500">振幅 r 数值非负性 (所有路径都经过 clamp_min)</td>
+                <td style="padding:6px 10px;text-align:center;font-family:monospace">1.000</td>
+                <td style="padding:6px 10px;color:#94a3b8;font-size:12px">违反数=0</td>
+                <td style="padding:6px 10px;color:#64748b;font-size:11px;font-family:monospace;max-width:300px;overflow:auto">{}</td>
+            </tr><tr>
+                <td style="padding:6px 10px"><span style="background:#4ade80;color:#000;padding:2px 8px;border-radius:10px;font-weight:bold">✓</span></td>
+                <td style="padding:6px 10px;font-weight:500">安全模式边界: u_cog>θ_safe → 均匀分布+α=0.5 保守融合</td>
+                <td style="padding:6px 10px;text-align:center;font-family:monospace">1.000</td>
+                <td style="padding:6px 10px;color:#94a3b8;font-size:12px">|α_L-α_P|=0.0e+00, softmax最大偏差=1.70e-08</td>
+                <td style="padding:6px 10px;color:#64748b;font-size:11px;font-family:monospace;max-width:300px;overflow:auto">{}</td>
+            </tr><tr>
+                <td style="padding:6px 10px"><span style="background:#4ade80;color:#000;padding:2px 8px;border-radius:10px;font-weight:bold">✓</span></td>
+                <td style="padding:6px 10px;font-weight:500">相位包裹到 [-π, π] 防止发散</td>
+                <td style="padding:6px 10px;text-align:center;font-family:monospace">1.000</td>
+                <td style="padding:6px 10px;color:#94a3b8;font-size:12px">输入范围=[-200.0,100.0] → 输出=[-0.531,1.571]</td>
+                <td style="padding:6px 10px;color:#64748b;font-size:11px;font-family:monospace;max-width:300px;overflow:auto">{}</td>
+            </tr>
+</tbody>
+</table>
+
+<div class="legend">
+<h3>📐 验证公式覆盖清单 (对应蓝图3.6.1 第十二节速查表)</h3>
+<ul>
+<li><b>(F)</b> 系统自由能: 势阱+耦合能+熵 → 验证 v2_1, v3_1, v5_1</li>
+<li><b>(L1/L2)</b> 朗之万相位/振幅更新 → 验证 v1_1, v3_1, v3_2, v4_2</li>
+<li><b>(8)</b> 能垒更新含相位衰减 → 振幅/能垒界: v6_1, v6_2</li>
+<li><b>(T)</b> 温度-不确定性耦合 → 验证 v1_2, v3_4, v5_3, v6_3</li>
+<li><b>(18)</b> 锚点相位对齐 + stopgrad → 验证 v1_4</li>
+<li><b>(GLU-3.6)</b> 相位调制GLU → 验证 v1_3, v2_2, v4_1</li>
+<li><b>(PSR)</b> 相位状态路由器 γ = σ(-Δθ²/(2T)) → 验证 v1_2, v3_4</li>
+<li><b>(GLU-P)</b> 相位相干指针-生成门 → 验证 v2_4, v5_2</li>
+<li><b>(OSC)</b> 谐振子计数槽 → 验证 v3_3</li>
+<li>热力学玻尔兹曼分层门控 α = σ(cos(Δθ)/T) → 验证 v1_2, v5_3</li>
+<li>相位包裹 [-π,π] + 复振幅参数化 → 验证 v2_3, v6_4</li>
+</ul>
+<h3>🧪 验证方法论</h3>
+<ul>
+<li><b>解析 vs 数值梯度:</b> 有限差分法检查反向传播正确性 (tol=5e-2)</li>
+<li><b>极限退化:</b> T→0/T→∞/θ→0 下解析表达式应匹配已知行为</li>
+<li><b>李雅普诺夫稳定性:</b> 零噪声下自由能单调递减率 ≥ 80%</li>
+<li><b>缩放律拟合:</b> 时间-维度对数线性回归，估计算法阶数</li>
+<li><b>边界饱和:</b> 极端输入下输出值域检查、NaN/Inf 扫描</li>
+</ul>
+</div>
+
+<div class="footer">
+  息壤·AetherMind 3.6.1 数学验证工具 ｜ 报告生成时间 2026-07-02 13:47:33
+</div>
+</div>
+</body>
+</html>

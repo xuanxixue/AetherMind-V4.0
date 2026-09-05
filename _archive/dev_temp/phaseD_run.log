@@ -1,0 +1,45 @@
+[Setup] 加载tokenizer...
+[Tokenizer] 加载Qwen2.5 tokenizer: D:\AetherMind-Nano3\models_local\Qwen\Qwen2___5-0___5B
+[Tokenizer] vocab_size=151643, pad=151643, eos=151643
+[Setup] tokenizer vocab_size=151643, 对齐后=151680, pad=151643, eos=151643
+======================================================================
+  AetherMind V4.0  息壤·双权重演化认知体  训练启动
+  模型: d_model=384, n_layers=6, n_heads=6, d_ff=1536, max_seq=512
+  训练: batch=1, grad_accum=8, lr=0.0003, total_steps=25000
+  三阶段: A=5000 / B=10000 / C=10000
+  输出: d:/AetherMind-Nano3/checkpoints_v4_fixed
+  数据: d:/AetherMind-Nano3/03_dialogue
+======================================================================
+[Setup] GPU显存守护：训练前清理...
+[GPU Guard] GPU总显存: 4096MB, 当前已用: 1255MB
+[GPU Guard] 没有其他GPU进程，显存干净
+
+[Setup] 加载分词器...
+[Tokenizer] 加载Qwen2.5 tokenizer: D:\AetherMind-Nano3\models_local\Qwen\Qwen2___5-0___5B
+[Tokenizer] vocab_size=151643, pad=151643, eos=151643
+[Setup] 词汇表大小: 151680
+[Setup] 设备: cuda | NVIDIA GeForce RTX 3050 Laptop GPU | 4.0 GB
+[Setup] 构建V4模型 (双权重演化架构)...
+C:\Python312\Lib\site-packages\torch\nn\modules\module.py:1326: UserWarning: expandable_segments not supported on this platform (Triggered internally at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\c10/cuda/CUDAAllocatorConfig.h:28.)
+  return t.to(
+[Setup] 参数量: 101,090,592 (385.6 MB)
+[Setup] 构建数据集...
+[Data] train split: 2 files [conversations_with_tools_with_inner_instruction_no_text2image_train_all_random_meta0.5_0.1_0.01_moss_0709.jsonl(2204MB), moss-003-sft-no-tools.jsonl(10686MB)]
+[Data] eval split: 2 files [conversations_with_tools_with_inner_instruction_no_text2image_train_all_random_meta0.5_0.1_0.01_moss_0709.jsonl(2204MB), moss-003-sft-no-tools.jsonl(10686MB)]
+[SelfCheck] 数据自检: 抽样1个batch验证形状...
+[Data] 发现 2 个文件, worker 负责 2 个
+[Data] 读取文件 1/2: moss-003-sft-no-tools.jsonl (10686.1MB)
+[SelfCheck] 通过: input_ids=(1, 512), labels=(1, 512), vocab_range=[11,115227]
+[Phase D] 从base checkpoint载入权重(步数归零): d:/AetherMind-Nano3/checkpoints_v4_fixed/v4_checkpoint_35000_final.pt
+[Resume] 恢复成功: step=0, phase=D
+[Setup] 完成
+
+
+[Phase D] 固化(LTP)专训 开始, 总步数: 2000
+[Phase D] base权重已冻结, 仅演化τ信息素网络 + 分位数固化写入consolidated
+[Phase D] 从 d:/AetherMind-Nano3/checkpoints_v4_fixed/v4_checkpoint_35000_final.pt 加载
+[Data] 发现 2 个文件, worker 负责 2 个
+[Data] 读取文件 1/2: conversations_with_tools_with_inner_instruction_no_text2image_train_all_random_meta0.5_0.1_0.01_moss_0709.jsonl (2203.7MB)
+[Phase D] 10/2000 tau=64.9 cons=0.0 rounds=0 | 0.9 step/s[Phase D] 20/2000 tau=54.1 cons=0.0 rounds=0 | 1.4 step/s[Phase D] 30/2000 tau=49.5 cons=0.0 rounds=0 | 1.8 step/s[Phase D] 40/2000 tau=47.0 cons=0.0 rounds=0 | 1.9 step/s[Phase D] 50/2000 tau=45.2 cons=0.0 rounds=0 | 2.1 step/s[Phase D] 60/2000 tau=44.0 cons=0.0 rounds=0 | 2.3 step/s[Phase D] 70/2000 tau=43.1 cons=0.0 rounds=0 | 2.4 step/s[Phase D] 80/2000 tau=42.4 cons=0.0 rounds=0 | 2.6 step/s[Phase D] 90/2000 tau=41.8 cons=0.0 rounds=0 | 2.7 step/s[Phase D] 100/2000 tau=42.3 cons=622469.9 rounds=1 | 2.8 step/s[Phase D] 110/2000 tau=41.4 cons=622469.9 rounds=1 | 2.9 step/s[Phase D] 120/2000 tau=41.0 cons=622469.9 rounds=1 | 3.0 step/s[Phase D] 130/2000 tau=40.7 cons=622469.9 rounds=1 | 3.1 step/s[Phase D] 140/2000 tau=40.5 cons=622469.9 rounds=1 | 3.1 step/s[Phase D] 150/2000 tau=40.8 cons=779138.3 rounds=2 | 3.1 step/s[Phase D] 160/2000 tau=40.4 cons=779138.3 rounds=2 | 3.1 step/s[Phase D] 170/2000 tau=40.3 cons=779138.3 rounds=2 | 3.0 step/s[Phase D] 180/2000 tau=40.3 cons=779138.3 rounds=2 | 3.0 step/s[Phase D] 190/2000 tau=40.2 cons=779138.3 rounds=2 | 3.0 step/s[Phase D] 200/2000 tau=40.3 cons=782013.8 rounds=3 | 3.1 step/s[Phase D] 210/2000 tau=40.2 cons=782013.8 rounds=3 | 3.1 step/s[Phase D] 220/2000 tau=40.2 cons=782013.8 rounds=3 | 3.1 step/s[Phase D] 230/2000 tau=40.1 cons=782013.8 rounds=3 | 3.1 step/s[Phase D] 240/2000 tau=40.2 cons=782013.8 rounds=3 | 3.1 step/s[Phase D] 250/2000 tau=40.2 cons=785149.5 rounds=4 | 3.1 step/s[Phase D] 260/2000 tau=40.2 cons=785149.5 rounds=4 | 3.2 step/s[Phase D] 270/2000 tau=40.1 cons=785149.5 rounds=4 | 3.2 step/s[Phase D] 280/2000 tau=40.0 cons=785149.5 rounds=4 | 3.2 step/s[Phase D] 290/2000 tau=40.0 cons=785149.5 rounds=4 | 3.2 step/s[Phase D] 300/2000 tau=40.0 cons=787985.2 rounds=5 | 3.2 step/s[Phase D] 310/2000 tau=39.9 cons=787985.2 rounds=5 | 3.1 step/s[Phase D] 320/2000 tau=39.9 cons=787985.2 rounds=5 | 3.1 step/s[Phase D] 330/2000 tau=39.8 cons=787985.2 rounds=5 | 3.1 step/s[Phase D] 340/2000 tau=39.8 cons=787985.2 rounds=5 | 3.0 step/s[Phase D] 350/2000 tau=39.8 cons=791031.0 rounds=6 | 3.0 step/s[Phase D] 360/2000 tau=39.8 cons=791031.0 rounds=6 | 3.0 step/s[Phase D] 370/2000 tau=39.9 cons=791031.0 rounds=6 | 3.0 step/s[Phase D] 380/2000 tau=39.9 cons=791031.0 rounds=6 | 3.0 step/s[Phase D] 390/2000 tau=39.8 cons=791031.0 rounds=6 | 3.0 step/s[Phase D] 400/2000 tau=39.8 cons=794070.7 rounds=7 | 3.0 step/s[Phase D] 410/2000 tau=39.8 cons=794070.7 rounds=7 | 3.1 step/s[Phase D] 420/2000 tau=39.8 cons=794070.7 rounds=7 | 3.1 step/s[Phase D] 430/2000 tau=39.7 cons=794070.7 rounds=7 | 3.1 step/s[Phase D] 440/2000 tau=39.8 cons=794070.7 rounds=7 | 3.1 step/s[Phase D] 450/2000 tau=39.9 cons=797069.3 rounds=8 | 3.1 step/s[Phase D] 460/2000 tau=39.8 cons=797069.3 rounds=8 | 3.2 step/s[Phase D] 470/2000 tau=39.8 cons=797069.3 rounds=8 | 3.2 step/s[Phase D] 480/2000 tau=39.9 cons=797069.3 rounds=8 | 3.2 step/s[Phase D] 490/2000 tau=40.0 cons=797069.3 rounds=8 | 3.2 step/s[Phase D] 500/2000 tau=40.0 cons=800070.0 rounds=9 | 3.2 step/s
+[Save] d:/AetherMind-Nano3/checkpoints_v4_fixed\v4_checkpoint_500_phaseD.pt | tau_conc=40.04 cons_mass=800070.0
+[Phase D] 510/2000 tau=40.1 cons=800070.0 rounds=9 | 3.2 step/s[Phase D] 520/2000 tau=40.0 cons=800070.0 rounds=9 | 3.2 step/s[Phase D] 530/2000 tau=39.9 cons=800070.0 rounds=9 | 3.2 step/s[Phase D] 540/2000 tau=39.9 cons=800070.0 rounds=9 | 3.2 step/s[Phase D] 550/2000 tau=39.9 cons=803061.7 rounds=10 | 3.2 step/s[Phase D] 560/2000 tau=39.8 cons=803061.7 rounds=10 | 3.2 step/s[Phase D] 570/2000 tau=39.8 cons=803061.7 rounds=10 | 3.2 step/s[Phase D] 580/2000 tau=39.7 cons=803061.7 rounds=10 | 3.2 step/s[Phase D] 590/2000 tau=39.8 cons=803061.7 rounds=10 | 3.2 step/s[Phase D] 600/2000 tau=39.8 cons=806136.0 rounds=11 | 3.3 step/s[Phase D] 610/2000 tau=39.9 cons=806136.0 rounds=11 | 3.3 step/s[Phase D] 620/2000 tau=39.8 cons=806136.0 rounds=11 | 3.2 step/s[Phase D] 630/2000 tau=39.7 cons=806136.0 rounds=11 | 3.2 step/s[Phase D] 640/2000 tau=39.8 cons=806136.0 rounds=11 | 3.2 step/s[Phase D] 650/2000 tau=39.9 cons=809044.5 rounds=12 | 3.2 step/s[Phase D] 660/2000 tau=39.8 cons=809044.5 rounds=12 | 3.2 step/s[Phase D] 670/2000 tau=39.9 cons=809044.5 rounds=12 | 3.1 step/s[Phase D] 680/2000 tau=39.9 cons=809044.5 rounds=12 | 2.8 step/s[Phase D] 690/2000 tau=39.9 cons=809044.5 rounds=12 | 2.5 step/s[Phase D] 700/2000 tau=40.0 cons=811878.7 rounds=13 | 2.2 step/s[Phase D] 710/2000 tau=39.9 cons=811878.7 rounds=13 | 2.1 step/s[Phase D] 720/2000 tau=39.9 cons=811878.7 rounds=13 | 1.9 step/s[Phase D] 730/2000 tau=40.0 cons=811878.7 rounds=13 | 1.8 step/s[Phase D] 740/2000 tau=40.0 cons=811878.7 rounds=13 | 1.7 step/s[Phase D] 750/2000 tau=40.1 cons=814830.7 rounds=14 | 1.6 step/s[Phase D] 760/2000 tau=40.1 cons=814830.7 rounds=14 | 1.4 step/s[Phase D] 770/2000 tau=40.1 cons=814830.7 rounds=14 | 1.3 step/s[Phase D] 780/2000 tau=40.0 cons=814830.7 rounds=14 | 1.2 step/s[Phase D] 790/2000 tau=39.9 cons=814830.7 rounds=14 | 1.2 step/s[Phase D] 800/2000 tau=40.0 cons=817819.5 rounds=15 | 1.2 step/s[Phase D] 810/2000 tau=40.0 cons=817819.5 rounds=15 | 1.2 step/s[Phase D] 820/2000 tau=39.9 cons=817819.5 rounds=15 | 1.2 step/s[Phase D] 830/2000 tau=39.9 cons=817819.5 rounds=15 | 1.2 step/s[Phase D] 840/2000 tau=39.9 cons=817819.5 rounds=15 | 1.2 step/s[Phase D] 850/2000 tau=39.9 cons=820791.7 rounds=16 | 1.2 step/s[Phase D] 860/2000 tau=39.8 cons=820791.7 rounds=16 | 1.2 step/s[Phase D] 870/2000 tau=39.8 cons=820791.7 rounds=16 | 1.2 step/s

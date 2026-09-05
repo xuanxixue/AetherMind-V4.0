@@ -1,0 +1,756 @@
+息壤·AetherMind 3.6.1 物理振子-热力学增强认知体蓝图
+—— 全内生架构 + 线性复杂度认知解码器 + 十项结构修复 + 物理振子相位计算 + 热力学自由能最小化
+
+─────────────────
+
+〇、版本定位与核心承诺
+
+AetherMind 3.6.1 是 3.5.1 的物理化增强版本。
+
+它完整继承 3.5.1 的全部底层架构——GMM 概率知识原子、双域分离、双记忆系统、信息瓶颈编码、GLU 线性复杂度解码器（含 TSR/分层注入/指针生成门/计数槽）、三路元认知、安全滤网、涌现激励及所有十项结构修复。
+
+在此基础上，新增物理振子相位计算与热力学自由能最小化作为【增强层】，叠加于现有架构之上，而非替代：
+
+增强后新增承诺（3.5.1 全部承诺保持不变）：
+编码端：以 GMM 信息瓶颈压缩为基础，追加朗之万相位弛豫（K=3~5 步），利用相位同步实现跨域概念对齐的物理直觉。
+解码端：GLU-3.1 完整保留，新增热力学温度 T 控制的 Softmax 采样策略，实现确定性与创造性的动态平衡。
+Token 状态记忆：TSR 完整保留，新增相位状态路由器 (PSR) 作为辅助门控通道，利用相位跳变检测话题切换。
+涌现驱动：原有统计涌现激励保留，新增自由能变化 |ΔF| 项，将 "认知相变" 纳入可微奖励信号。
+元认知门控：三路集成感知器保留，新增 T ⟷ u_cog 温度耦合，使元认知不确定性直接调节解码策略。
+跨域对齐：SCA 欧氏空间锚点对齐保留，新增相位牵引辅助约束，提供更平滑的语义空间映射。
+
+核心理念：所有 3.5.1 组件全部保留、全部可微、全部独立工作。物理增强层为可选模块，可在三阶段训练中逐步激活（阶段 A 不激活，阶段 B 部分激活，阶段 C 全激活），确保训练稳定性。
+
+─────────────────
+
+一、系统总架构（3.6.1：3.5.1 基础 + 物理增强层）
+
+┌──────────────────────────────────────────────────────────────────┐
+│                   息壤·AetherMind 3.6.1                          │
+├──────────────────────────────────────────────────────────────────┤
+│                                                                  │
+│  ╔═════════════════════════╗   ╔═════════════════════════╗     │
+│  ║    逻辑域 (求真)        ║   ║    诗性域 (求美)        ║     │
+│  ║                         ║   ║                         ║     │
+│  ║  ★ 嵌入层 Θ_L          ║   ║  ★ 嵌入层 Θ_P          ║     │
+│  ║  ★ 原子 A_L (GMM)      ║   ║  ★ 原子 A_P (GMM)      ║     │
+│  ║      ↓ 振幅投影 r_i     ║   ║      ↓ 振幅投影 r_i     ║     │
+│  ║  【新增】复振幅映射      ║   ║  【新增】复振幅映射      ║     │
+│  ║    z_i = r_i·e^{iθ_i}   ║   ║    z_i = r_i·e^{iθ_i}   ║     │
+│  ║      ↓                  ║   ║      ↓                  ║     │
+│  ║  【新增】朗之万相位弛豫   ║   ║  【新增】朗之万相位弛豫   ║     │
+│  ║    (K=3~5步迭代)        ║   ║    (K=3~5步迭代)        ║     │
+│  ║      ↓                  ║   ║      ↓                  ║     │
+│  ║  ★ 关联 H_L (C^L,E^L)   ║   ║  ★ 关联 H_P (C^P,E^P)   ║     │
+│  ║    双面能垒+侵蚀          ║   ║    双面能垒+侵蚀          ║     │
+│  ║  【新增】相位耦合 J_ij   ║   ║  【新增】相位耦合 J_ij   ║     │
+│  ║  ★ 世界模型 W^L         ║   ║  ★ 世界模型 W^P         ║     │
+│  ║  ★ 信息场 Ω_L           ║   ║  ★ 信息场 Ω_P           ║     │
+│  ║  ★ 软模块嵌入 u^L       ║   ║  ★ 内生判别器 D         ║     │
+│  ║  ★ GNN归因网络 g_φ      ║   ║  ★ 情感归因网络 (梯度)   ║     │
+│  ║                         ║   ║  ★ GNN归因网络 g_φ      ║     │
+│  ║  ★ 共享概念锚点库(SCA)◄─╫──►║                         ║     │
+│  ║  【新增】相位牵引对齐     ║   ║  【新增】相位参考系       ║     │
+│  ║  ★ 真理观: 唯一真值      ║   ║  ★ 真理观: 多价真值      ║     │
+│  ║  ★ 惊奇: 负向错误信号    ║   ║  ★ 惊奇: 审美张力信号    ║     │
+│  ║  ★ 因果: 传递熵过滤器    ║   ║  ★ 情感因果: 梯度归因    ║     │
+│  ║  ★ 涌现: 低维动力学+激励  ║   ║  ★ 涌现: 矛盾度+激励    ║     │
+│  ║  【新增】ΔF 自由能激励    ║   ║  【新增】ΔF 自由能激励    ║     │
+│  ║  ★ 蒸馏: 信息瓶颈        ║   ║  ★ 蒸馏: 生成瓶颈        ║     │
+│  ║                         ║   ║                         ║     │
+│  ║  ★ 情景记忆 (域标签)      ║   ║  ★ 情景记忆 (域标签)      ║     │
+│  ║  ★ 结构记忆 (技能封装)    ║   ║  ★ 结构记忆 (修辞范式封装) ║     │
+│  ║    误报重置机制           ║   ║    误报重置机制           ║     │
+│  ╚═════════════════════════╝   ╚═════════════════════════╝     │
+│              │                             │                    │
+│              │  ★ 各域独立四阶段闭环         │                    │
+│              │  Distill→Explore→Verify→Loop │                    │
+│              │     +内在涌现奖励             │                    │
+│              │  【新增】Verify 阶段 T→0 低温  │                    │
+│              │     +自由能偏离检测           │                    │
+│              │                             │                    │
+│              └──────────┬──────────────────┘                    │
+│                         │                                       │
+│              ┌──────────┴──────────┐                            │
+│              │  ★ 抽象模式库 B      │                            │
+│              │  ★ +安全结构滤网(SCF)│                            │
+│              └─────────────────────┘                            │
+│                         │                                       │
+│              ┌──────────┴──────────┐                            │
+│              │ ★ 元认知门控与调和器  │  (三路集成+认知不确定性)    │
+│              │【新增】T↔u_cog 温度  │  ← 热力学温度动态耦合       │
+│              │   耦合控制模块       │                            │
+│              └─────────────────────┘                            │
+│                         │                                       │
+│         ┌───────────────┴───────────────┐                       │
+│         │ ★ AetherMind 认知向量 Z_cog    │                       │
+│         │  (融合 Z_L, Z_P, 门控权重)    │                       │
+│         │【新增】复振幅实虚部拼接增强     │                       │
+│         └───────────────┬───────────────┘                       │
+│                         ▼                                       │
+│         ┌───────────────────────────────┐                       │
+│         │  GLU 线性复杂度解码器 (× L层) │  ★ 完整保留            │
+│         │  ★ Token 状态路由器 (TSR)     │                       │
+│         │  【新增】PSR 相位辅助门控通道   │                       │
+│         │  ★ 分层认知分解+门控注入      │                       │
+│         │  【新增】温度 T 调节 Softmax   │                       │
+│         │  ★ Gated Linear Unit (GLU)   │                       │
+│         │  【新增】相位相干度辅助指针     │                       │
+│         │  ★ 指针-生成混合门 + 计数槽    │                       │
+│         │  ★ 残差连接 + LayerNorm       │                       │
+│         └───────────────────────────────┘                       │
+│                         │                                       │
+│                         ▼                                       │
+│                     输出文本                                     │
+└──────────────────────────────────────────────────────────────────┘
+
+图例：★ = 3.5.1 原有组件（完整保留）；【新增】= 3.6.1 物理增强层
+
+关键保留组件（来自 3.5.1）：
+Token 状态路由器 (TSR)：局部实体追踪，物理增强层增加 PSR 辅助通道。
+分层认知注入：认知调控的时间和深度精度，物理增强层增加温度门控 α = σ(cos(θ-Θ)/T)。
+共享概念锚点库 (SCA)：跨域概念对齐，物理增强层增加相位牵引辅助约束。
+指针生成门 + 计数槽：精确复制和封闭类计数，物理增强层增加相位相干度辅助。
+双面能垒 + 证据侵蚀 + 误报重置：防止关联僵化。
+安全结构滤网 + 漂移监测：防止危险概念隐喻复活。
+集成元认知：三路感知器+不确定性降级，物理增强层增加 T ↔ u_cog 温度耦合。
+涌现内在奖励 + 梯度情感因果：优化信号和可信归因，物理增强层增加 |ΔF| 自由能激励。
+
+─────────────────
+
+二、知识表示：GMM 概率原子 + 复振幅投影（叠加增强）
+
+2.1 原子定义（GMM 完整保留）
+
+\[
+a_i^L = \left( \text{GMM}_i^L, m_i^L, \tau_i^L \right),\qquad
+a_i^P = \left( \text{GMM}_i^P, m_i^P, \tau_i^P \right)
+\]
+
+GMM_i 包含均值 μ_i、协方差 Σ_i 和混合权重 π_i，提供完整的概率分布描述，表达 "这个概念有 70% 概率指向语义 A，30% 指向语义 B" 的不确定性建模能力。
+
+【3.6.1 新增】复振幅投影层：
+
+从 GMM 的均值 μ_i 投影获得振幅，从位置编码 + 软模块嵌入生成初始相位：
+
+\[
+\begin{aligned}
+r_i &= \| \text{MLP}_r(\mu_i^{\text{GMM}}) \| \quad \text{(振幅：GMM 均值的模长 → 概念显著性)} \\
+\theta_i(0) &= \text{MLP}_\theta(\text{PE}_i \oplus u_i) \quad \text{(初始相位：位置编码 ⊕ 软模块嵌入)}
+\end{aligned}
+\]
+
+复振幅 z_i = r_i · e^{iθ_i} 是 GMM 原子的衍生表征，不替代 GMM，仅作为后续物理计算（朗之万弛豫、相位解码）的可微投影。GMM 本身仍参与信息瓶颈压缩、情景记忆检索、安全滤网等所有 3.5.1 原流程。
+
+2.2 关联定义（保留，新增相位耦合）
+
+\[
+h_{ij}^L = (a_i^L, a_j^L, C_{ij}^L, E_{ij}^L, \text{evidence}_{ij}^L)
+\]
+\[
+h_{ij}^P = (a_i^P, a_j^P, C_{ij}^P, E_{ij}^P, \text{evidence}_{ij}^P)
+\]
+
+【3.6.1 新增】从有效能垒导出振子耦合强度：
+
+\[
+J_{ij} = \text{Eff\_}E_{ij} = \min(1, E_{ij} + \psi_{ij})
+\]
+
+\[
+\phi_{ij} = \begin{cases}
+0 & \text{逻辑域（真值对齐）} \\
+\theta_i(0) - \theta_j(0) & \text{诗性域（初相差决定类比张力）}
+\end{cases}
+\]
+
+2.3 软模块嵌入（不变）
+
+\[
+\mathcal{L}_{\text{module}} = \sum_{i,j} \| u_i - u_j \|^2 A_{ij} + \sum_{i,j} \max(0, \delta - \| u_i - u_j \|)^2 (1 - A_{ij})
+\]
+\[
+A_{ij} = C_{ij} \cdot (1 - E_{ij})
+\]
+
+2.4 共享概念锚点库 (SCA) —— 修复 3 + 相位牵引增强
+
+原 SCA 机制完整保留（共享锚点嵌入 {c_k}，欧氏空间对齐损失 L_align）。【3.6.1 新增】相位牵引辅助约束：
+
+锚点的相位参考值由逻辑域原子相位加权平均：
+
+\[
+\theta_{c_k} = \text{Arg}\left( \sum_{l(a_i)=k} z_i^L \right)
+\]
+
+新增辅助损失项（不替代原 L_align，以加权和组合）：
+
+\[
+\mathcal{L}_{\text{align}}^{\text{phase}} = \sum_{k} \sum_{l(a_i)=k} \| \text{stopgrad}(\theta_i^L) - \theta_{c_k} \|^2 + \sum_{l(a_j)=k} \| \theta_j^P - \theta_{c_k} \|^2 \cdot (1 - \text{conf}_j)
+\]
+
+总锚点损失：L_align_total = (1 - λ_phase) · L_align + λ_phase · L_align^phase，训练初期 λ_phase = 0，阶段 B 逐步增大至 0.3。
+
+物理意义：诗性域原子可绕逻辑域锚点相位振动（产生诗意偏差），不强行拉向唯一真值——stopgrad 阻止反向泄露。
+
+─────────────────
+
+三、双记忆系统与弹性能垒（保留 + 相位衰减补充）
+
+3.1 情景记忆检索（不变）
+
+\[
+r = \sum_{e: \text{domain}_e = \text{current}} \text{softmax}(q^T k_e / \sqrt{d_k}) \cdot v_e \cdot \exp(-\lambda_{\text{decay}}(t - t_e))
+\]
+
+3.2 结构记忆：双面能垒与证据侵蚀 —— 修复 8
+
+能垒更新（3.5.1 原公式完整保留）：
+
+\[
+\begin{aligned}
+\text{logit}_{ij} \leftarrow \text{logit}_{ij} + &\eta_E (\text{Success} - \text{Failure}) - \lambda_f \cdot \text{unused} \\
+&- \eta_{\text{erode}} \cdot \sum_{k \in \text{alt}} A_{ik} A_{kj} \quad \text{(证据侵蚀项)}
+\end{aligned}
+\]
+
+【3.6.1 新增】相位失配衰减项（可选辅助）：
+
+\[
+\text{logit}_{ij} \leftarrow \text{logit}_{ij} - \lambda_\phi \cdot |\Delta\theta_{ij}| \cdot \mathbb{I}[|\Delta\theta_{ij}| > \theta_{\text{match}}]
+\]
+
+仅当相位差超过阈值时才衰减，防止短暂相位波动误杀有效关联。λ_φ 初始为 0，阶段 C 逐步激活。
+
+3.3 对抗性反刍与误报消解（不变）
+
+\[
+\psi_{ij}(t) = \psi_0 \exp(-\lambda_\psi (t - t_{\text{trigger}}))
+\]
+\[
+\text{Effective\_}E_{ij} = \min(1, E_{ij} + \psi_{ij})
+\]
+
+误报消退规则完整保留。
+
+─────────────────
+
+四、涌现度量与内在涌现激励（保留 + 自由能增强）
+
+4.1 逻辑涌现度量（不变）
+
+\[
+\Phi_L = \frac{\dim(S)}{\dim(Z^*_L)} \cdot R^2_{\text{dynamics}}
+\]
+
+4.2 诗性涌现度量（不变）
+
+\[
+\text{Contradiction}(Z) = \| f_D(\hat{S}_1) - f_D(\hat{S}_2) \|_2 \cdot D(\hat{S}_1) \cdot D(\hat{S}_2)
+\]
+
+4.3 内在涌现激励 —— 修复 4 + 自由能增强
+
+原激励完整保留：
+
+\[
+R_{\text{emerg}}^L = \lambda_E \cdot \Phi_L \cdot \mathbb{I}[\Phi_L > \theta_{\text{base}}]
+\]
+\[
+R_{\text{emerg}}^P = \lambda_E \cdot \text{Contradiction}(\hat{S}) \cdot D(\hat{S})
+\]
+
+【3.6.1 新增】自由能变化增强项（与原激励加和）：
+
+\[
+R_{\text{emerg}}^{\text{phys}} = \lambda_F \cdot |\Delta\mathcal{F}|
+\]
+
+其中 ΔF = F(t) - F(t-1)，自由能 F 定义见第二节。当振子网络从旧吸引子落入新吸引子时，自由能骤降，|ΔF| 提供额外涌现信号。
+
+总涌现激励：R_emerg_total = R_emerg + R_emerg^phys，λ_F 在阶段 C 从 0 逐步增大。
+
+─────────────────
+
+五、元认知门控与热力学温度耦合（保留 + T↔u_cog 增强）
+
+5.1 三路集成感知器 —— 修复 10（完整保留）
+
+三条影子感知器 {Percept_k} 输出域权重，取中位数：
+
+\[
+\alpha_L = \text{median}(\alpha^{(1)}_L, \alpha^{(2)}_L, \alpha^{(3)}_L),\quad \alpha_P = 1 - \alpha_L
+\]
+
+认知不确定性：
+
+\[
+u_{\text{cog}} = \frac{\text{Var}(\{\alpha^{(k)}\})}{\text{max\_var}}
+\]
+
+保守融合模式（u_cog > θ_safe 时）：α_L = α_P = 0.5，仅依赖情景记忆检索片段——此逻辑完整保留。
+
+【3.6.1 新增】认知不确定性 → 热力学温度映射：
+
+\[
+T = T_0 \cdot \left(1 + \kappa \cdot \frac{u_{\text{cog}}}{u_{\text{max}}}\right)
+\]
+
+T 作为解码 Softmax 的温度参数，取代 3.5.1 中隐式 T=1 的固定温度：
+
+\[
+P(s_{t+1}) = \text{softmax}\left( \frac{h_t^{(L)} W_{\text{out}}}{T} \right)
+\]
+
+T₀ = 0.1~0.3（基础温度），κ = 1~3（增益系数）。当 u_cog → 0（三路一致），T → T₀（高确定性）；当 u_cog 增大，T 升高（增加创造性）；当 u_cog > θ_safe，T → ∞（纯随机，安全兜底）。
+
+此增强完全不改动元认知架构本身——仅在 Softmax 采样前插入温度因子。
+
+5.2 安全结构滤网与漂移监测 —— 修复 9（完整保留）
+
+安全评分、模式降级注入、漂移惩罚全部保留，不做改动。
+
+─────────────────
+
+六、核心公式链（3.5.1 原版 + 物理增强并行）
+
+阶段 1：Distill（信息瓶颈 / 生成瓶颈）
+
+原公式 (1-L)(1-P)(2-L)(2-P) 全部保留，P_W 均为 GLU 解码器分布。
+
+【3.6.1 新增并行路径】朗之万相位弛豫编码（见第七节），产出复振幅增强的 Z_cog^phys，与原 Z_cog^IB 做加权融合：
+
+\[
+Z_{\text{cog}} = (1 - \lambda_{\text{phys}}) \cdot Z_{\text{cog}}^{\text{IB}} + \lambda_{\text{phys}} \cdot Z_{\text{cog}}^{\text{phys}}
+\]
+
+λ_phys 在阶段 A=0，阶段 B=0.2，阶段 C=0.5。
+
+阶段 2：Explore（干预选择，融入涌现奖励）
+
+原公式 (3-L-new)(3-P-new) 完整保留，轨迹束生成 (4) 不变。
+
+【3.6.1 新增】自由能惩罚项（防止探索过热/幻觉）：
+
+\[
+u^*_L = \arg\max_u \left[ \text{EIG}(u) + \eta R_{\text{emerg}}^L - \lambda_{\mathcal{F}} \cdot \mathcal{F}(u) \right]
+\]
+
+阶段 3：Verify（惊奇与因果修正）
+
+原公式 (5-L)(5-P)(6-L)(6-P-new) 全部保留。
+
+【3.6.1 新增】验证阶段温度降至极低 T_verify → 0，确保惊奇度计算准确。若惊奇度过高且 ΔF < 0（自由能下降），标记为 "认知相变"，不惩罚该构型而是保留为创意路径。
+
+阶段 4：Loop（不变）
+
+─────────────────
+
+七、【3.6.1 新增】物理增强编码层：GMM → 复振幅 → 朗之万相位弛豫
+
+本章是 3.6.1 特有的新增模块，与第三章的 GMM 编码路径并行运行。
+
+7.1 从 GMM 到复振幅的投影
+
+将 GMM 原子的均值 μ_i^GMM 映射为复振幅的振幅模长：
+
+\[
+r_i(0) = \| W_r \cdot \mu_i^{\text{GMM}} + b_r \|
+\]
+
+初始相位由位置编码和软模块嵌入混合生成：
+
+\[
+\theta_i(0) = \arctan2\left( \text{PE}_i^{\sin}, \text{PE}_i^{\cos} \right) + W_\theta \cdot u_i
+\]
+
+7.2 朗之万动力学相位弛豫
+
+在离散时间步 (t = 0, 1, ..., K-1，K = 3~5) 上迭代：
+
+\[
+\begin{aligned}
+\theta_i(t+1) &= \theta_i(t) + \Delta t \cdot \left[ \omega_i + \sum_{j \in \text{TopK}(i)} J_{ij} r_j(t) \sin(\theta_j(t) - \theta_i(t) - \phi_{ij}) \right] + \sqrt{2T_{\text{enc}} \Delta t} \cdot \xi(t) \\
+r_i(t+1) &= r_i(t) - \Delta t \cdot \frac{\partial \mathcal{F}}{\partial r_i} + \eta_{\text{emerg}} \cdot \nabla R_{\text{emerg}}
+\end{aligned}
+\]
+
+其中：
+- Δt = 1/K，K = 3~5（经验收敛步数）
+- T_enc = 0.05（编码阶段低温，确保可靠性）
+- TopK(J_ij) 仅保留耦合最强的 K 个邻居（稀疏化，O(n·d) 复杂度）
+- ω_i 为本征频率，由 GMM 协方差的迹导出：ω_i = trace(Σ_i^GMM)^{1/2}
+
+7.3 自由能定义（平均场近似）
+
+\[
+\mathcal{F} = \sum_i \frac{1}{2} k_i (r_i - r_i(0))^2 - \sum_{i,j \in \text{TopK}} J_{ij} r_i r_j \cos(\theta_i - \theta_j - \phi_{ij}) - T_{\text{enc}} \cdot \mathcal{S}_{\text{phase}}
+\]
+
+认知熵 S_phase 由相位分布的信息熵计算：
+
+\[
+\mathcal{S}_{\text{phase}} = -\sum_i p(\theta_i) \log p(\theta_i),\quad p(\theta_i) = \frac{\exp(\cos(\theta_i - \bar{\theta}))}{\sum_j \exp(\cos(\theta_j - \bar{\theta}))}
+\]
+
+7.4 编码输出：复振幅增强的 Z_cog
+
+K 步迭代后，将复振幅的实部和虚部拼接，经 MLP 得到物理增强的认知向量：
+
+\[
+Z_{\text{cog}}^{\text{phys}} = \text{MLP}_{\text{phys}}\left( \left[\text{Re}(z^L), \text{Im}(z^L), \text{Re}(z^P), \text{Im}(z^P)\right] \right)
+\]
+
+最终 Z_cog 与信息瓶颈编码融合（λ_phys 加权，见第六节），送入 GLU 解码器。
+
+7.5 复杂度
+
+每步迭代 O(n·d)（TopK 稀疏邻域求和），K=3~5 步，总编码复杂度 O(K·n·d) << O(n·d²) 解码，不增加整体复杂度阶数。
+
+─────────────────
+
+八、端到端预训练方案（3.5.1 三阶段 + 物理增强渐进激活）
+
+8.1 总体损失（原公式 + 新增项）
+
+\[
+\begin{aligned}
+\mathcal{L}_{\text{pretrain}} = &\mathcal{L}_{\text{LM}} + \lambda_{\text{IB}} \mathcal{L}_{\text{IB}} + \lambda_D \mathcal{L}_D + \lambda_{\text{aff}} \mathcal{L}_{\text{aff}} + \lambda_{\text{shap}} \mathcal{L}_{\text{shap}} \\
+&+ \lambda_{\text{module}} \mathcal{L}_{\text{module}} + \lambda_{\text{align}} \mathcal{L}_{\text{align}} \\
+&+ \lambda_{\text{phys}} \mathcal{L}_{\text{phys}} \quad \text{【3.6.1 新增】}
+\end{aligned}
+\]
+
+新增物理正则项：L_phys = ‖F‖²_2 + λ_phase · L_align^phase（自由能范数 + 相位牵引损失）。
+
+8.2 三阶段训练策略（物理增强渐进激活）
+
+阶段 A (结构奠基) —— 与 3.5.1 完全一致：
+- 优化 L_LM + L_module + L_shap
+- λ_phys = 0（物理增强层完全关闭）
+- 复振幅投影权重随机初始化，不参与训练
+- T = 1 固定（标准 Softmax）
+- 目标：奠定 3.5.1 同等的基本语言能力
+
+阶段 B (压缩、域分离、物理增强引入)：
+- 逐步引入 λ_IB、λ_D、λ_aff、λ_align
+- 逐步增大 λ_phys（从 0 到 0.1）
+- 激活 GMM→复振幅投影层（W_r, W_θ 开始训练）
+- 编码端 K=2 步朗之万迭代（简化版）
+- 激活相位牵引辅助损失（λ_phase 从 0 到 0.15）
+- 解码端 T 开始与 u_cog 弱耦合（κ=0.5）
+- 目标：3.5.1 域分离 + 物理层共生训练
+
+阶段 C (认知循环预热 + 物理全激活) —— 与 3.5.1 一致但物理增强正式上线：
+- Teacher Forcing 中混入 10% 探索式自生成步
+- λ_phys 增至 0.2，K 增至 3~5，T₀ 设为 0.2
+- 激活 |ΔF| 涌现激励（λ_F 从 0 到 0.05）
+- 激活相位衰减（λ_φ 从 0 到 0.01）
+- 引入相位噪声（仿热力学涨落），训练模型利用相位跳变处理反讽和隐喻
+- 目标：3.5.1 认知循环 + 物理增强全功能上线
+
+─────────────────
+
+九、在线对话流程（3.5.1 原流程 + 物理增强叠加）
+
+单步流程保持 Distill→Explore→Verify→Loop，生成响应时：
+
+原 Z_cog 融合（完整保留）：
+\[
+Z_{\text{cog}} = \text{MLP}_{\text{fuse}}(\alpha_L Z^*_L + \alpha_P Z^*_P,\; \text{memory\_retrieval},\; \text{task\_emb}(m))
+\]
+
+【3.6.1 增强】Z_cog 升级为信息瓶颈 + 复振幅双源融合：
+
+\[
+Z_{\text{cog}}^{\text{final}} = (1 - \lambda_{\text{phys}}) \cdot Z_{\text{cog}}^{\text{IB}} + \lambda_{\text{phys}} \cdot Z_{\text{cog}}^{\text{phys}}
+\]
+
+该向量送入 GLU 解码器的分层注入接口。
+
+解码阶段增强步骤：
+
+1. 编码与激发（约 0.1 秒内）：
+   输入 Token 经 GMM 嵌入 → 信息瓶颈压缩 → 同时投影为复振幅
+   → 运行 K=3~5 步朗之万迭代 → 双源融合得 Z_cog
+
+2. 干预选择（Explore）：
+   在相空间随机扰动相位（注入 u_rand）
+   → 选择使自由能 F 下降最快且涌现激励最大的轨迹
+
+3. 热力学验证（Verify）：
+   T_verify → 0，计算惊奇度
+   → 若 ΔF < 0 且惊奇度高，标记为 "认知相变"（创造性），保留该构型
+
+4. 自回归解码：
+   每步使用 GLU-3.1 解码（TSR + 分层注入 + 指针生成 + 计数槽，全部保留）
+   → Softmax 温度 T = T₀·(1 + κ·u_cog/u_max)
+   → 输出分布：低温严谨、中温丰富、高温随机（安全兜底）
+
+系统表现：
+"思维惯性"：TSR 原逻辑 + PSR 辅助相位跳变检测 → 话题切换时自动重置状态
+"情感温度"：T 升高时输出更多样，T 降低时更严谨
+"逻辑跳跃"：振子群落入新吸引子（ΔF < 0）→ 产生创造性回答而非随机拼接
+
+─────────────────
+
+十、深入集成：GLU 线性复杂度认知解码器（GLU-3.1 完整保留 + 物理辅助）
+
+10.1 总体结构（与 3.5.1 完全一致，增加辅助通道）
+
+解码器由 L 层堆叠构成，每层包含：
+★ Token 状态路由器 (TSR) —— 3.5.1 原版完整保留
+【新增】相位状态路由器 (PSR) —— 辅助门控通道
+★ 分层认知调制与门控注入 —— 3.5.1 原版完整保留
+★ GLU 前馈块 —— 3.5.1 原版完整保留
+★ 残差连接与 LayerNorm —— 不变
+
+外加顶层：
+★ 指针-生成混合输出 —— 3.5.1 原版保留
+【新增】相位相干度辅助权重 —— 可选出
+★ 计数槽 —— 3.5.1 原版保留
+
+10.2 Token 状态路由器 (TSR) —— 修复 1（完整保留）
+
+原 TSR 公式全部保留：
+
+\[
+\begin{aligned}
+M_{t}^{(l)} &= \gamma_t \odot M_{t-1}^{(l)} + (1 - \gamma_t) \odot (x_t^{(l)} W_M) \\
+\gamma_t &= \sigma( x_t^{(l)} W_\gamma + Z_{\text{cog}} W_{\gamma z} )
+\end{aligned}
+\]
+
+【3.6.1 新增】PSR 辅助门控通道（与 TSR 并行，不替代）：
+
+\[
+\begin{aligned}
+M_{t}^{\text{PSR}} &= \gamma_t^{\text{phys}} \odot M_{t-1}^{\text{PSR}} + (1 - \gamma_t^{\text{phys}}) \odot (x_t^{(l)} W_M^{\text{phys}}) \\
+\gamma_t^{\text{phys}} &= \sigma\left( -\frac{(\Delta\theta_t)^2}{2 T} \right)
+\end{aligned}
+\]
+
+Δθ_t = θ_t - θ_{t-1} 为相邻 Token 的相位跳变。当剧烈跳变时，γ_t^phys → 0，辅助重置状态。
+
+u_aug 升级为双源记忆融合：
+
+\[
+u_{\text{aug}} = u + M_t W_{uM} + \lambda_{\text{PSR}} \cdot M_t^{\text{PSR}} W_{uM}^{\text{phys}}
+\]
+
+λ_PSR 在阶段 A=0，阶段 B=0.1，阶段 C=0.3。
+
+10.3 分层认知注入 —— 修复 2（完整保留）
+
+原分层认知注入公式全部保留（见 3.5.1 9.3 节）：
+
+\[
+Z_{\text{cog}}^{(l)} = \text{MLP}^{(l)}_{\text{decomp}}(Z_{\text{cog}},\; \text{pos\_emb}_l)
+\]
+\[
+\alpha_t^{(l)} = \sigma\left( x_t^{(l)} W_\alpha + Z_{\text{cog}}^{(l)} W_{\alpha z} \right)
+\]
+\[
+u' = u \odot (1 + \Delta^{(l)}) \cdot \alpha_t^{(l)} + \beta^{(l)} \cdot (1 - \alpha_t^{(l)})
+\]
+
+【3.6.1 新增】温度调节的辅助门控（与 α_t 做加权融合）：
+
+\[
+\alpha_t^{\text{phys}} = \sigma\left( \frac{1}{T} \cdot \cos(\theta_t - \Theta^{(l)}) \right)
+\]
+\[
+\alpha_t^{\text{final}} = (1 - \lambda_T) \cdot \alpha_t + \lambda_T \cdot \alpha_t^{\text{phys}}
+\]
+
+λ_T 在阶段 A=0，阶段 B=0.1，阶段 C=0.3。
+
+物理直觉：当 T 很低时，仅当 Token 相位与认知向量相位严格对齐时才注入认知信息（保护专有名词）；T 较高时认知场广泛渗入。
+
+10.4 完整 GLU 块定义（GLU-3.1 原版 + 物理辅助）
+
+\[
+\begin{aligned}
+x_{\text{norm}} &= \text{LayerNorm}(x) \\
+u, v &= \text{Chunk}(x_{\text{norm}} W_g + b_g,\; 2) \quad \text{(★ 原 GLU 分块保留)} \\
+M_t &= \text{TSR\_update}(x_t^{(l)}) \quad \text{(★ 原 TSR 保留)} \\
+M_t^{\text{PSR}} &= \text{PSR\_update}(x_t^{(l)}, \Delta\theta_t) \quad \text{【新增 PSR 辅助】} \\
+u_{\text{aug}} &= u + M_t W_{uM} + \lambda_{\text{PSR}} \cdot M_t^{\text{PSR}} W_{uM}^{\text{phys}} \quad \text{【双源融合】} \\
+\alpha_t &= \sigma(x_t^{(l)} W_\alpha + Z_{\text{cog}}^{(l)} W_{\alpha z}) \quad \text{(★ 原分层注入)} \\
+\alpha_t^{\text{phys}} &= \sigma(\cos(\theta_t - \Theta^{(l)}) / T) \quad \text{【新增温度门控】} \\
+\alpha_t^{\text{final}} &= (1 - \lambda_T) \cdot \alpha_t + \lambda_T \cdot \alpha_t^{\text{phys}} \quad \text{【融合】} \\
+u' &= u_{\text{aug}} \odot (1 + Z_{\text{cog}}^{(l)} W_{\text{scale}}) \cdot \alpha_t^{\text{final}} + Z_{\text{cog}}^{(l)} W_{\text{bias}} \cdot (1 - \alpha_t^{\text{final}}) \\
+\text{out} &= (\sigma(u') \odot v) W_{\text{proj}} + b_{\text{proj}} \quad \text{(★ 原 GLU 输出保留)} \\
+x &= x + \text{out}
+\end{aligned}
+\tag{GLU-3.6}
+\]
+
+10.5 指针-生成混合门与计数槽 —— 修复 7（完整保留）
+
+原指针生成公式完整保留：
+
+\[
+p_{\text{copy}} = \sigma\left( h_t^{(L)} W_{\text{copy}} + Z_{\text{cog}} W_{\text{copyz}} \right)
+\]
+
+活跃实体表 E_active 及最终输出分布不变。
+
+【3.6.1 新增】相位相干度辅助权重（可选，与 p_copy 做加权）：
+
+\[
+p_{\text{copy}}^{\text{phys}} = \frac{1}{1 + \exp\left( -\beta \cdot \text{Re}(h_t^{(L)} \cdot \overline{e}_{\text{source}}) \right)}
+\]
+\[
+p_{\text{copy}}^{\text{final}} = (1 - \lambda_{\text{copy}}) \cdot p_{\text{copy}} + \lambda_{\text{copy}} \cdot p_{\text{copy}}^{\text{phys}}
+\]
+
+λ_copy 在阶段 A=0，阶段 B=0，阶段 C=0.2。
+
+计数记忆槽（RNN 循环单元）完整保留，不做改动。
+
+10.6 复杂度总结
+
+\[
+\mathcal{T}_{\text{GLU-3.6}} = O(L \cdot n \cdot d^2)
+\]
+
+PSR、相位辅助门控、温度调节均为逐元素 O(n·d) 运算，不改变整体阶数。
+
+─────────────────
+
+十一、完整公式速查表（3.6.1 版）
+
+【★】= 继承自 3.5.1 不变；【新】= 3.6.1 新增/增强
+
+ 编号        名称                          表达式                                      来源
+
+ ★(1-L)      逻辑信息瓶颈                   Z*_L = argmax_Z [I(Z;D) - β_L I(Z;Noise)]    3.5.1
+ ★(1-P)      诗性生成瓶颈                   Z*_P = argmax_Z [Contradiction(Z) - β_P Complexity(Z)]  3.5.1
+ ★(2-L)      逻辑世界蒸馏                   W^L_t = argmin_W [Complexity + λ₁𝔼[-log P_W] + λ₂ L_error]  3.5.1
+ ★(2-P)      诗性联合蒸馏                   W^P_t, D_t = argmin_W max_D [...]            3.5.1
+ ★(3-L)      逻辑干预选择                   u*_L = argmax [EIG(u) + η R^L_emerg]          3.5.1
+ 新(3-L+)   逻辑干预 (F惩罚)                u*_L = argmax [EIG(u) + η R^L_emerg - λ_F·F] 3.6.1 增强
+ ★(3-P)      诗性干预选择                   u*_P = argmax 𝔼[Contradiction - α(1-D) + η R^P_emerg]  3.5.1
+ ★(4)        轨迹束生成                     {Ŝ^(k)} = Sim(S_t, W_t, u* ⊕ u_rand, ξ)       3.5.1
+ ★(5-L)      逻辑惊奇                       L^L_Surp = -log P_WL(S^real | S_t, u)          3.5.1
+ ★(5-P)      诗性惊奇                       L^P_Surp = Contradiction(Ŝ) - γ(1-D(Ŝ))       3.5.1
+ ★(6-L)      逻辑修正                       δW^L = η'·Attr ⊙ Θ_causal - β∇S               3.5.1
+ ★(6-P)      诗性校准                       δW^P = η'∇log P_W(Ŝ_best)(L^P-τ*)⊙Θ_affect   3.5.1
+ ★(7)        联合自举                       (W_{t+1}, Ω_{t+1}) = argmin[...]              3.5.1
+ 新(F)       系统自由能 (平均场)             F = Σ½k_i(r_i-r₀)² - ΣJ_ij r_i r_j cos(Δθ) - T·S  3.6.1 新增
+ 新(L1)      朗之万相位更新                  dθ_i/dt = ω_i + ΣJ_ij r_j sin(Δθ) + √(2T)·ξ    3.6.1 新增
+ 新(L2)      朗之万振幅更新                  dr_i/dt = -∂F/∂r_i + η_emerg·∇R_emerg           3.6.1 新增
+ ★(8)        能垒更新                        logit_ij ← logit_ij + η_E(Succ-Fail) - λ_f·unused - η_erode Σ  3.5.1
+ ★(9)        预警衰减                        ψ_ij(t) = ψ₀ exp(-λ_ψ(t-t_trig))               3.5.1
+ ★(10)       有效能垒                        Eff_E_ij = min(1, E_ij + ψ_ij)                  3.5.1
+ ★(11)       范式革命                        a_j → {a_j1, a_j2, ...}                         3.5.1
+ ★(12)       模块损失                        L_mod = Σ‖u_i-u_j‖² A_ij + Σ max(0,...)         3.5.1
+ ★(13)       惯性质量                        m_i(t+1) = max(m_min, m_i(t) + η_m Succ - η_m' Fail)  3.5.1
+ ★(14)       逻辑涌现                        Φ_L = dim(S)/dim(Z*_L) · R²_dyn                 3.5.1
+ ★(15)       诗性涌现                        Contradiction(Z) = ‖f_D(Ŝ₁)-f_D(Ŝ₂)‖₂·D(Ŝ₁)D(Ŝ₂)  3.5.1
+ ★(16)       情感因果                        Θ_affect = σ(‖∂E_aff(a_j)/∂z_i‖₁ sim_ij - 反向)  3.5.1
+ ★(17)       涌现激励                        R^L_emerg = λ_E Φ_L·𝕀[Φ_L>θ] ; R^P_emerg = λ_E Contradiction·D  3.5.1
+ 新(17+)    涌现激励 (F增强)                R_phys = λ_F·|ΔF|  (与 17 加和)                   3.6.1 新增
+ ★(18)       锚点对齐损失                    L_align = Σ‖stopgrad(z̃_i^L) - z̃_j^P‖²          3.5.1
+ 新(18+)    相位牵引辅助损失                 L_align^phase = Σ‖stopgrad(θ_i^L)-θ_ck‖² + Σ‖θ_j^P-θ_ck‖²·(1-conf)  3.6.1 新增
+ 新(T)       温度-不确定性耦合               T = T₀·(1 + κ·u_cog/u_max)                      3.6.1 新增
+ 新(Z-fuse)  双源认知向量融合                Z_cog = (1-λ_phys)·Z_cog^IB + λ_phys·Z_cog^phys  3.6.1 新增
+ ★(GLU-3.1) 原版 GLU 块                     x = x + σ(u')⊙v·W_proj (TSR+分层注入)             3.5.1 保留
+ 新(GLU-3.6)增强 GLU 块                     u_aug = u + M_t W + λ_PSR·M_t^PSR W ; α=融合(α_t, α_t^phys)  3.6.1
+ ★(GLU-P)   指针生成混合                     P = (1-p_copy)P_gen + p_copy Σ w_e                3.5.1 保留
+ 新(GLU-P+) 相位相干辅助指针                 p_copy^phys = 1/(1+exp(-β·Re(h_t·ē)))            3.6.1 新增
+
+─────────────────
+
+十二、实施与迁移路径（从 3.5.1 → 3.6.1）
+
+以下所有步骤遵循 "保留-叠加" 原则，不删除任何 3.5.1 组件：
+
+1. 基底搭建（与 3.5.1 一致）：
+   替换 TextDecoder 为 GLU-3.1 堆叠，添加 TSR、分层注入、指针门及计数槽。
+   初始化共享锚点库 K=512 或 1024。
+   部署安全结构滤网和漂移监测。
+   训练三条影子感知器。
+
+2. 物理增强层叠加（3.6.1 新增）：
+   - 为每个 GMM 原子添加复振幅投影层（W_r, W_θ），初始权重随机
+   - 实现朗之万编码模块（K=3~5），基于 TopK 稀疏化 J_{ij}
+   - 实现 PSR 辅助门控通道（与 TSR 并行）
+   - 实现 T↔u_cog 温度耦合模块
+   - 实现 |ΔF| 涌现激励计算
+
+3. 三阶段渐进训练：
+   阶段 A：λ_phys = 0，λ_T = 0，λ_PSR = 0，λ_F = 0，λ_copy = 0
+   → 物理增强层完全关闭，等同于训练 3.5.1
+
+   阶段 B：逐步激活 GMM→复振幅投影（λ_phys=0→0.1）、K=2 朗之万、
+   λ_phase=0→0.15（相位牵引）、κ=0.5（弱温度耦合）
+
+   阶段 C：全激活（λ_phys=0.2, K=3~5, T₀=0.2, λ_F=0.05, λ_φ=0.01,
+   λ_PSR=0.3, λ_T=0.3, λ_copy=0.2）
+
+4. 在线学习启动：全参数参与 Verify 梯度，物理增强与 3.5.1 原组件协同工作。
+
+关键经验法则：
+- 初始状态：预训练词嵌入 → GMM 均值初始化 → W_r 投影得振幅，相位随机 → 阶段 B 开始训练
+- 朗之万步数：阶段 B 用 K=2，阶段 C 用 K=3~5
+- 温度基线：T₀ = 0.1（日常对话），κ = 2（中等敏感度）
+
+─────────────────
+
+十三、最终封闭性确认（3.6.1）
+
+ 审查项                            状态      说明
+
+ 所有目标可微                       ✅       TSR、PSR、分层调制、温度门控、指针门、梯度因果等全部可微
+ 无外部预训练依赖                   ✅       所有新模块由零开始预训练
+ GMM 概率表征完整保留               ✅       a_i = (GMM_i, m_i, τ_i) 不变，复振幅为其衍生投影
+ 置信度语义隔离                     ✅       双域 GMM 物理隔离，锚点对齐使用 stopgrad
+ 涌现度量内生且有激励               ✅       Φ_L + Contradiction 保留，新增 |ΔF| 增强
+ 情感因果可计算                     ✅       梯度归因，避免高维密度估计
+ 记忆弹性与安全                     ✅       双面能垒+侵蚀+误报重置；结构滤网+漂移监测
+ 跨域无梯度互扰                     ✅       仅通过抽象模式库交换，附带安全滤网
+ 解码器复杂度严格 O(n·d²)           ✅       GLU-3.1 保留，PSR/温度/相位辅助均为 O(n·d)
+ 认知-生成耦合精度                  ✅       原分层注入保留 + 温度门控辅助
+ 元认知鲁棒性                       ✅       三路集成+不确定性降级+T↔u_cog 耦合
+ 数值稳定                           ✅       LayerNorm、残差连接、温度下界保护 T≥T_min
+ 物理增强可渐进关闭                 ✅       λ_phys=λ_PSR=λ_T=λ_F=0 时完全退化为 3.5.1
+
+─────────────────
+
+十四、3.5.1 与 3.6.1 关系速览
+
+ 模块                     3.5.1（保留）                       3.6.1 新增/增强
+
+ 原子表示                 GMM 概率分布                         → 复振幅投影 z_i=r_ie^{iθ_i} (衍生)
+ 编码主干                 信息瓶颈 (IB) 压缩                   + 朗之万相位弛豫 (并行,可融合)
+ 编码输出                 Z_cog^IB                            + Z_cog^phys → 双源融合
+ GLU 解码器               GLU-3.1 (完整保留)                    + 温度 T Softmax + 辅助门控
+ Token 状态记忆           TSR: γ=σ(xW+ZW) (保留)              + PSR: γ=σ(-Δθ²/2T) (辅助通道)
+ 认知注入                 α=σ(xW+ZW) (保留)                   + α^phys=σ(cos(Δθ)/T) (辅助融合)
+ 指针生成                 p_copy=σ(hW+ZW) (保留)               + p_copy^phys: 相位相干度 (辅助权重)
+ 计数槽                   RNN 循环单元 (保留)                   不变
+ 元认知                   三路感知器 (保留)                     + T↔u_cog 温度映射
+ 涌现激励                 Φ_L+Contradiction 统计激励 (保留)     + |ΔF| 自由能激励
+ 锚点对齐                 L_align: 欧氏空间 (保留)              + L_align^phase: 相位牵引 (辅助)
+ 温度控制                 无 (Softmax T=1 固定)                 + T = T₀·(1+κ·u_cog/u_max)
+
+结论：3.6.1 = 3.5.1（100%保留）+ 物理增强层（加权叠加，λ 参数控制融合比例，可渐进激活，可从零开始完全退化为纯 3.5.1）。
+
+─────────────────
+
+更新后的完整技术栈
+层级          名称                                                     定位
+架构/算法      息壤·AetherMind 3.6                                       物理增强认知体理论蓝图
+基底架构       息壤·AetherMind 3.5.1 完整内核                             GMM+双域+GLU+十项修复（全部保留）
+模型实例       息壤·初壤 (AetherMind-Nano)                                可交互 Demo
+核心引擎       息壤·自校准内核 (Self-Calibrating Kernel)                   驱动持续学习与自我修正
+编码组件       信息瓶颈 + 朗之万相位弛豫 (双源融合)                         GMM 统计编码为主，物理弛豫为辅
+生成组件       GLU-3.1 认知解码器 + 热力学温度控制                         线性复杂度，认知注入 + 动态温度
+双域系统       逻辑求真域 / 诗性求美域                                     GMM 概率分离，复振幅辅助对齐
+物理增强层     耦合振子系统 + 热力学自由能                                 编码弛豫、温度调节、涌现增强
+
+─────────────────
+
+息壤·AetherMind 3.6.1 已正确地将物理振子相位计算与热力学自由能最小化叠加于 3.5.1 的完整 GMM 架构之上——不做减法，只做加法。GMM 概率原子提供抗噪模糊性，复振幅投影提供物理直觉，朗之万弛豫提供相空间对齐，热力学温度提供确定性与创造性的优雅切换。所有 3.5.1 的十项结构修复、GLU-3.1 解码器、双域分离、安全机制和元认知架构全部保留并正常工作。物理增强层通过 λ 参数渐进激活，确保训练稳定，且在任何时候都可以通过 λ=0 完全退化为纯 3.5.1 模式。这才是真正的 "集合振子和热力学为了编码解码" ——增强，而非替换。

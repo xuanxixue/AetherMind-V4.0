@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self';">
+  <title>{{WINDOW_TITLE}}</title>
+  <link rel="stylesheet" href="../node_modules/xterm/css/xterm.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header id="titlebar">
+    <div class="title-left"><span class="logo">◆</span><span class="title-text">{{WINDOW_TITLE}}</span></div>
+    <div class="title-right">
+      <button id="btn-start" class="btn btn-start">启动训练 / Start</button>
+      <button id="btn-stop" class="btn btn-stop" disabled>停止 / Stop</button>
+      <span id="clock" class="clock">--:--:--</span>
+    </div>
+  </header>
+  <main id="main">
+    <aside id="sidebar">{{PANEL_HTML}}</aside>
+    <section id="content">
+      <div id="charts">{{CHART_HTML}}</div>
+      <div id="terminal-section">
+        <div id="tab-bar">
+          <div id="tabs"></div>
+          <button id="btn-new-tab" class="btn-tab-add" title="新建终端 New terminal">+</button>
+          <div class="tab-actions">
+            <button id="btn-clear" class="btn-tab-action" title="清空 Clear">清空 Clear</button>
+            <button id="btn-copy" class="btn-tab-action" title="复制 Copy">复制 Copy</button>
+            <button id="btn-download" class="btn-tab-action" title="保存 Save">保存 Save</button>
+          </div>
+        </div>
+        <div id="terminal-container"></div>
+        <div id="input-bar">
+          <input type="text" id="cmd-input" placeholder="输入命令回车发送 / Type command, Enter to send" autocomplete="off">
+          <button id="btn-send" class="btn btn-send">发送 Send</button>
+        </div>
+      </div>
+    </section>
+  </main>
+  <footer id="statusbar">
+    <span id="status-text">就绪 / Ready</span>
+    <span id="status-right">提示: 鼠标框选终端文本可复制 / Select text to copy</span>
+  </footer>
+  <script src="../node_modules/xterm/lib/xterm.js"></script>
+  <script src="../node_modules/xterm-addon-fit/lib/xterm-addon-fit.js"></script>
+  <script src="renderer.js"></script>
+</body>
+</html>

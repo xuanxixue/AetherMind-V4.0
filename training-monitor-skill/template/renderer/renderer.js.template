@@ -1,0 +1,193 @@
+// renderer.js - {{MODEL_NAME}} Monitor (generated)
+const Terminal = window.Terminal;
+const FitAddonClass = (window.FitAddon && window.FitAddon.FitAddon) || window.FitAddon;
+
+// === 指标配置（从配置生成）===
+const METRICS = {{METRIC_CONFIG}};
+const CHARTS = {{CHART_CONFIG}};
+const TRAIN_CMD = {{TRAIN_CMD}};
+
+let tabs = [];
+let activeTabId = null;
+let tabCounter = 0;
+const charts = {};
+
+const termTheme = {
+  background: '#0d1117', foreground: '#e0e0e0', cursor: '#00e5ff',
+  black: '#000', red: '#ff5252', green: '#00e676', yellow: '#ffeb3b',
+  blue: '#448aff', magenta: '#b388ff', cyan: '#00e5ff', white: '#e0e0e0',
+  brightBlack: '#666', brightRed: '#ff7070', brightGreen: '#00ff88',
+  brightYellow: '#fff176', brightBlue: '#82b1ff', brightMagenta: '#d1c4e9',
+  brightCyan: '#84ffff', brightWhite: '#fff'
+};
+
+function createTab(label) {
+  const id = ++tabCounter;
+  const paneId = `pane-${id}`;
+  const container = document.getElementById('terminal-container');
+  const pane = document.createElement('div');
+  pane.className = 'terminal-pane'; pane.id = paneId; container.appendChild(pane);
+  const term = new Terminal({ cursorBlink: true, fontSize: 12, fontFamily: 'Consolas, "Cascadia Code", "Microsoft YaHei", monospace', theme: termTheme, scrollback: 5000, convertEol: true });
+  const fitAddon = new FitAddonClass(); term.loadAddon(fitAddon); term.open(pane);
+  setTimeout(() => fitAddon.fit(), 50);
+
+  const tabsEl = document.getElementById('tabs');
+  const tabEl = document.createElement('div');
+  tabEl.className = 'tab' + (tabs.length === 0 ? ' active' : '');
+  tabEl.innerHTML = `<span class="tab-label">${label}</span><span class="tab-close">×</span>`;
+  tabEl.querySelector('.tab-close').addEventListener('click', (e) => { e.stopPropagation(); closeTab(id); });
+  tabEl.addEventListener('click', () => switchTab(id));
+  tabsEl.appendChild(tabEl);
+
+  const tab = { id, label, term, fitAddon, paneEl, tabEl, sessionId: null };
+  tabs.push(tab);
+  if (tabs.length === 1) activeTabId = id;
+  else switchTab(id);
+
+  term.onData((data) => { if (tab.sessionId) window.api.ptyInput(tab.sessionId, data); });
+  return tab;
+}
+
+function getActiveTab() { return tabs.find(t => t.id === activeTabId); }
+function switchTab(id) {
+  activeTabId = id;
+  tabs.forEach(t => { t.paneEl.classList.toggle('hidden', t.id !== id); t.tabEl.classList.toggle('active', t.id === id); });
+  const tab = getActiveTab(); if (tab) setTimeout(() => tab.fitAddon.fit(), 50);
+}
+function closeTab(id) {
+  const idx = tabs.findIndex(t => t.id === id); if (idx < 0) return;
+  const tab = tabs[idx];
+  if (tab.sessionId) window.api.sessionClose(tab.sessionId);
+  tab.tabEl.remove(); tab.paneEl.remove();
+  tabs.splice(idx, 1);
+  if (activeTabId === id && tabs.length > 0) switchTab(tabs[Math.max(0, idx - 1)].id);
+}
+
+// === 图表 ===
+function initCharts() {
+  CHARTS.forEach(cfg => {
+    const box = document.getElementById('chart-' + cfg.id);
+    if (!box) return;
+    const canvas = box.querySelector('canvas');
+    charts[cfg.id] = { canvas, ctx: canvas.getContext('2d'), color: cfg.color, data: [] };
+  });
+  resizeCharts();
+}
+function resizeCharts() {
+  for (const id of Object.keys(charts)) {
+    const { canvas } = charts[id];
+    const rect = canvas.parentElement.getBoundingClientRect();
+    canvas.width = rect.width * window.devicePixelRatio;
+    canvas.height = rect.height * window.devicePixelRatio;
+    canvas.style.width = rect.width + 'px'; canvas.style.height = rect.height + 'px';
+  }
+}
+function drawChart(id, data, color) {
+  const { canvas, ctx } = charts[id]; if (!ctx || data.length < 2) return;
+  const w = canvas.width, h = canvas.height;
+  ctx.clearRect(0, 0, w, h);
+  const min = Math.min(...data), max = Math.max(...data);
+  const range = max - min || 1;
+  ctx.strokeStyle = color; ctx.lineWidth = 2; ctx.beginPath();
+  data.forEach((v, i) => { const x = (i / (data.length - 1)) * w; const y = h - ((v - min) / range) * (h - 4) - 2; i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y); });
+  ctx.stroke();
+  ctx.fillStyle = color; ctx.font = '10px monospace'; ctx.fillText(data[data.length-1].toFixed(4), w - 50, 12);
+}
+function drawAllCharts(curves) { for (const [id, data] of Object.entries(curves)) { if (charts[id]) drawChart(id, data, charts[id].color); } }
+
+// === 指标更新 ===
+function setVal(id, text, cls) {
+  const el = document.getElementById(id); if (!el) return;
+  el.textContent = text;
+  el.className = 'metric-val' + (cls ? ' val-' + cls : '');
+}
+function updateMetrics(m) {
+  METRICS.forEach(cfg => {
+    const val = m[cfg.key];
+    if (cfg.type === 'step_total') {
+      setVal('m-' + cfg.key, `${m.step || 0} / ${m.total || 0}`);
+      const pct = m.total > 0 ? ((m.step / m.total) * 100).toFixed(1) : 0;
+      setVal('m-pct', pct + '%');
+      const fill = document.getElementById('progress-fill'); if (fill) fill.style.width = pct + '%';
+    } else if (cfg.type === 'gpu') {
+      setVal('m-gpu', `${m.gpu_used || 0}/${m.gpu_total || 0} MB`);
+      const pct = (m.gpu_pct || 0) * 100;
+      setVal('m-gpupct', pct.toFixed(1) + '%');
+      const fill = document.getElementById('gpu-bar-fill');
+      if (fill) { fill.style.width = pct + '%'; fill.style.background = pct > 95 ? '#ff5252' : pct > 85 ? '#ffeb3b' : '#00e676'; }
+      setVal('m-gpustatus', pct > 95 ? 'OOM!' : pct > 85 ? 'WARN' : 'SAFE', pct > 95 ? 'red' : pct > 85 ? 'yellow' : 'green');
+    } else if (cfg.format === 'exp') {
+      setVal('m-' + cfg.key, val ? val.toExponential(2) : '0.0');
+    } else if (cfg.format === 'fixed4') {
+      setVal('m-' + cfg.key, val ? val.toFixed(4) : '0.0000', cfg.color || '');
+    } else {
+      setVal('m-' + cfg.key, val != null ? val : '?');
+    }
+  });
+  if (m.phase) setVal('m-phase', m.phase);
+  if (m.bad != null) setVal('m-bad', m.bad, m.bad > 0 ? 'red' : 'green');
+  if (m.eta) setVal('m-eta', m.eta);
+  document.getElementById('status-text').textContent = m.running ? `运行中 Running - Phase ${m.phase} | ${m.step}/${m.total} | loss=${(m.loss||0).toFixed(4)}` : '就绪 / Ready';
+}
+
+// === 事件 ===
+window.api.onPtyData(({ id, data }) => { const tab = tabs.find(t => t.sessionId === id); if (tab) tab.term.write(data); });
+window.api.onMetricsUpdate((data) => { updateMetrics(data); if (data.curves) drawAllCharts(data.curves); });
+window.api.onGpuUpdate((gpu) => {
+  setVal('m-gpu', `${gpu.used}/${gpu.total} MB`);
+  const pct = (gpu.pct * 100).toFixed(1);
+  setVal('m-gpupct', pct + '%');
+  const fill = document.getElementById('gpu-bar-fill');
+  if (fill) { fill.style.width = pct + '%'; fill.style.background = gpu.pct > 0.95 ? '#ff5252' : gpu.pct > 0.85 ? '#ffeb3b' : '#00e676'; }
+});
+window.api.onSessionExit(({ id }) => {
+  const tab = tabs.find(t => t.sessionId === id);
+  if (tab) { tab.term.write('\r\n\x1b[31m[进程已退出 / Process exited]\x1b[0m\r\n'); tab.tabEl.querySelector('.tab-label').textContent = tab.label + ' (已结束)'; }
+  setStatus('会话已退出 / Session exited');
+  document.getElementById('btn-start').disabled = false;
+  document.getElementById('btn-stop').disabled = true;
+});
+
+document.getElementById('btn-start').addEventListener('click', async () => {
+  setStatus('正在启动 / Launching...');
+  const tab = createTab('训练 Training');
+  const result = await window.api.sessionCreate(TRAIN_CMD, 'Training');
+  if (result.ok) { tab.sessionId = result.id; setStatus('训练已启动 / Started'); document.getElementById('btn-start').disabled = true; document.getElementById('btn-stop').disabled = false; }
+  else { tab.term.write(`\x1b[31m[ERROR] ${result.msg}\x1b[0m\r\n`); setStatus('启动失败 / Failed: ' + result.msg); }
+});
+document.getElementById('btn-stop').addEventListener('click', async () => {
+  const tab = getActiveTab();
+  if (tab && tab.sessionId && confirm('确认停止？/ Stop?')) { await window.api.sessionClose(tab.sessionId); setStatus('已停止 / Stopped'); }
+});
+document.getElementById('btn-clear').addEventListener('click', () => { const tab = getActiveTab(); if (tab) tab.term.clear(); setStatus('已清空 / Cleared'); });
+document.getElementById('btn-copy').addEventListener('click', async () => {
+  const tab = getActiveTab(); if (!tab) return;
+  const selected = tab.term.getSelection();
+  if (selected) { try { await navigator.clipboard.writeText(selected); setStatus('已复制 / Copied'); } catch { const ta = document.createElement('textarea'); ta.value = selected; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); } }
+  else setStatus('未选中文本 / No text selected');
+});
+document.getElementById('btn-download').addEventListener('click', async () => {
+  const tab = getActiveTab(); if (!tab || !tab.sessionId) { setStatus('无活动会话 / No session'); return; }
+  const result = await window.api.logDownload(tab.sessionId);
+  setStatus(result.ok ? '已保存 / Saved: ' + result.path : (result.msg || '已取消 / Cancelled'));
+});
+document.getElementById('btn-new-tab').addEventListener('click', () => createTab('终端 Terminal ' + (tabCounter + 1)));
+document.getElementById('btn-send').addEventListener('click', sendCmd);
+document.getElementById('cmd-input').addEventListener('keydown', (e) => { if (e.key === 'Enter') sendCmd(); });
+function sendCmd() {
+  const input = document.getElementById('cmd-input'); const cmd = input.value.trim(); if (!cmd) return;
+  const tab = getActiveTab();
+  if (cmd === 'stop') { if (tab && tab.sessionId) window.api.sessionClose(tab.sessionId); }
+  else if (cmd === 'start') { document.getElementById('btn-start').click(); }
+  else if (cmd === 'clear') { if (tab) tab.term.clear(); }
+  else if (tab && tab.sessionId) { window.api.ptyInput(tab.sessionId, cmd + '\r'); }
+  input.value = '';
+}
+function setStatus(text) { document.getElementById('status-text').textContent = text; }
+
+window.addEventListener('resize', () => { resizeCharts(); tabs.forEach(t => t.fitAddon.fit()); });
+setInterval(() => { const d = new Date(); document.getElementById('clock').textContent = d.toLocaleTimeString('zh-CN', { hour12: false }); }, 1000);
+
+initCharts();
+createTab('终端 Terminal');
+setStatus('就绪 / Ready - 点击"启动训练"或输入命令 / Click Start or type commands');

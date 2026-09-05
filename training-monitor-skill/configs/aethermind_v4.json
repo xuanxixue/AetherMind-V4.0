@@ -1,0 +1,25 @@
+{
+  "model_name": "AetherMind V4",
+  "window_title": "AetherMind V4 训练监控中心 / Monitor",
+  "train_command": ["train_v4_full_7day.cmd"],
+  "project_root": "D:/AetherMind-Nano3",
+  "metrics": {
+    "phase":   {"regex": "ph=([A-Z])|Phase ([A-Z])", "label": "阶段 Phase", "panel": "training"},
+    "step":    {"regex": "\\(\\s*(\\d+)\\s*\\/\\s*(\\d+)\\s*\\)", "label": "步数 Step", "type": "step_total", "panel": "training"},
+    "loss":    {"regex": "loss=([\\d.]+)", "label": "Loss", "format": "fixed4", "color": "cyan", "panel": "training"},
+    "lr":      {"regex": "lr=([\\d.eE+-]+)", "label": "学习率 LR", "format": "exp", "panel": "training"},
+    "sps":     {"regex": "([\\d.]+)\\s*step\\/s", "label": "速度 Speed", "panel": "training"},
+    "bad":     {"regex": "bad=(\\d+)", "label": "坏批次 Bad", "panel": "training"},
+    "eta":     {"regex": "ETA\\s+(\\S+)", "label": "剩余 ETA", "panel": "training"},
+    "tau":     {"regex": "tau=([\\d.]+)", "label": "τ浓度 tau", "panel": "physics"},
+    "cons":    {"regex": "cons=([\\d.]+)", "label": "固化量 cons", "panel": "physics"},
+    "physics_ratio": {"regex": "physics=([\\d.]+)", "label": "物理占比 ratio", "panel": "physics"},
+    "dominance": {"regex": "→\\s*(\\S+)", "label": "主导权 dom", "panel": "physics"},
+    "nan_detected": {"regex": "", "label": "NaN/Inf", "panel": "validation"},
+    "grad_ratio": {"regex": "", "label": "梯度比 grad", "panel": "validation"},
+    "compression_kl": {"regex": "KL=([\\d.]+)", "label": "压缩KL KL", "panel": "validation"},
+    "gpu":     {"type": "gpu", "label": "显存 VRAM", "panel": "gpu"}
+  },
+  "charts": ["loss", "lr", "gpu", "tau", "physics_ratio"],
+  "panels": ["training", "physics", "validation", "gpu"]
+}

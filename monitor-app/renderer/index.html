@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self';">
+  <title>AetherMind V4 训练监控中心</title>
+  <link rel="stylesheet" href="../node_modules/xterm/css/xterm.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- 标题栏 -->
+  <header id="titlebar">
+    <div class="title-left">
+      <span class="logo">◆</span>
+      <span class="title-text">AetherMind V4 训练监控中心 / Monitor</span>
+    </div>
+    <div class="title-right">
+      <button id="btn-start" class="btn btn-start">启动训练 / Start</button>
+      <button id="btn-stop" class="btn btn-stop" disabled>停止 / Stop</button>
+      <span id="clock" class="clock">--:--:--</span>
+    </div>
+  </header>
+
+  <!-- 主体 -->
+  <main id="main">
+    <!-- 左侧指标面板 -->
+    <aside id="sidebar">
+      <div class="panel panel-cyan">
+        <div class="panel-title">训练状态 / Training</div>
+        <div class="metric-row"><span class="metric-label">阶段 Phase</span><span class="metric-val" id="m-phase">?</span></div>
+        <div class="metric-row"><span class="metric-label">步数 Step</span><span class="metric-val" id="m-step">0 / 0</span></div>
+        <div class="metric-row"><span class="metric-label">进度 Progress</span><span class="metric-val" id="m-pct">0%</span></div>
+        <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+        <div class="metric-row"><span class="metric-label">Loss</span><span class="metric-val val-cyan" id="m-loss">0.0000</span></div>
+        <div class="metric-row"><span class="metric-label">学习率 LR</span><span class="metric-val" id="m-lr">0.0</span></div>
+        <div class="metric-row"><span class="metric-label">速度 Speed</span><span class="metric-val" id="m-sps">0 step/s</span></div>
+        <div class="metric-row"><span class="metric-label">剩余 ETA</span><span class="metric-val" id="m-eta">?</span></div>
+        <div class="metric-row"><span class="metric-label">坏批次 Bad</span><span class="metric-val val-green" id="m-bad">0</span></div>
+      </div>
+
+      <div class="panel panel-orange">
+        <div class="panel-title">物理演化 / Physics</div>
+        <div class="metric-row"><span class="metric-label">τ浓度 tau</span><span class="metric-val" id="m-tau">0.0</span></div>
+        <div class="metric-row"><span class="metric-label">τ斜率 slope</span><span class="metric-val" id="m-tau-slope">0.0</span></div>
+        <div class="metric-row"><span class="metric-label">固化量 cons</span><span class="metric-val" id="m-cons">0</span></div>
+        <div class="metric-row"><span class="metric-label">物理占比 ratio</span><span class="metric-val val-green" id="m-physics">0.000</span></div>
+        <div class="metric-row"><span class="metric-label">主导权 dom</span><span class="metric-val" id="m-dom">?</span></div>
+      </div>
+
+      <div class="panel panel-purple">
+        <div class="panel-title">验证监控 / Validation</div>
+        <div class="metric-row"><span class="metric-label">NaN/Inf</span><span class="metric-val val-green" id="m-nan">正常 OK</span></div>
+        <div class="metric-row"><span class="metric-label">τ饱和 sat</span><span class="metric-val val-green" id="m-tauhigh">正常 OK</span></div>
+        <div class="metric-row"><span class="metric-label">梯度比 grad</span><span class="metric-val" id="m-grad">0.0</span></div>
+        <div class="metric-row"><span class="metric-label">压缩KL KL</span><span class="metric-val" id="m-kl">0.000</span></div>
+        <div class="metric-row"><span class="metric-label">迁移性 mig</span><span class="metric-val val-green" id="m-klstatus">通过 PASS</span></div>
+      </div>
+
+      <div class="panel panel-red">
+        <div class="panel-title">GPU显存 / VRAM</div>
+        <div class="metric-row"><span class="metric-label">显存 VRAM</span><span class="metric-val" id="m-gpu">0/0 MB</span></div>
+        <div class="metric-row"><span class="metric-label">占用率 Usage</span><span class="metric-val val-green" id="m-gpupct">0%</span></div>
+        <div class="metric-row"><span class="metric-label">状态 Status</span><span class="metric-val val-green" id="m-gpustatus">安全 SAFE</span></div>
+        <div class="metric-row"><span class="metric-label">守护清理 Clear</span><span class="metric-val" id="m-wdclear">0次</span></div>
+        <div class="metric-row"><span class="metric-label">紧急释放 Emerg</span><span class="metric-val" id="m-wdemerg">0次</span></div>
+        <div class="gpu-bar"><div class="gpu-bar-fill" id="gpu-bar-fill"></div></div>
+      </div>
+    </aside>
+
+    <!-- 右侧内容区 -->
+    <section id="content">
+      <!-- 曲线图区 -->
+      <div id="charts">
+        <div class="chart-box"><canvas id="chart-loss"></canvas><div class="chart-label">Loss / 损失</div></div>
+        <div class="chart-box"><canvas id="chart-physics"></canvas><div class="chart-label">Physics / 物理占比</div></div>
+        <div class="chart-box"><canvas id="chart-tau"></canvas><div class="chart-label">tau / 信息素</div></div>
+        <div class="chart-box"><canvas id="chart-gpu"></canvas><div class="chart-label">GPU % / 显存</div></div>
+        <div class="chart-box"><canvas id="chart-lr"></canvas><div class="chart-label">LR / 学习率</div></div>
+      </div>
+
+      <!-- 终端区 -->
+      <div id="terminal-section">
+        <!-- 标签栏 -->
+        <div id="tab-bar">
+          <div id="tabs"></div>
+          <button id="btn-new-tab" class="btn-tab-add" title="新建终端 New terminal">+</button>
+          <div class="tab-actions">
+            <button id="btn-clear" class="btn-tab-action" title="清空终端 Clear">清空 Clear</button>
+            <button id="btn-copy" class="btn-tab-action" title="复制选中 Copy">复制 Copy</button>
+            <button id="btn-download" class="btn-tab-action" title="保存日志 Save log">保存 Save</button>
+          </div>
+        </div>
+        <!-- 终端容器 -->
+        <div id="terminal-container"></div>
+        <!-- 输入栏 -->
+        <div id="input-bar">
+          <input type="text" id="cmd-input" placeholder="输入命令回车发送 / Type command, Enter to send (stop=停止, start=启动, clear=清空)" autocomplete="off">
+          <button id="btn-send" class="btn btn-send">发送 Send</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- 状态栏 -->
+  <footer id="statusbar">
+    <span id="status-text">就绪 / Ready</span>
+    <span id="status-right">提示: 鼠标框选终端文本可复制 / Select text to copy</span>
+  </footer>
+
+  <script src="../node_modules/xterm/lib/xterm.js"></script>
+  <script src="../node_modules/xterm-addon-fit/lib/xterm-addon-fit.js"></script>
+  <script src="renderer.js"></script>
+</body>
+</html>

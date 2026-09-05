@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AetherMind V4.0 Phase E 语言组织 SFT</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js">
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js">
+    </script>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            background: #0b0e17;
+            font-family: 'Segoe UI', 'PingFang SC', Roboto, system-ui, sans-serif;
+            display: flex;
+            justify-content: center;
+            padding: 30px 20px;
+            color: #e0e6f0;
+        }
+        .container {
+            max-width: 1300px;
+            width: 100%;
+            background: #141a26;
+            border-radius: 24px;
+            padding: 28px 30px 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
+            border: 1px solid #2a3344;
+        }
+        h1 {
+            font-size: 26px;
+            font-weight: 600;
+            background: linear-gradient(135deg, #6b9cf7, #a78bfa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 6px;
+        }
+        h1 small {
+            font-size: 15px;
+            font-weight: 400;
+            background: #1f2a3a;
+            padding: 4px 16px;
+            border-radius: 30px;
+            -webkit-text-fill-color: #8e9bb5;
+            letter-spacing: 0.3px;
+            border: 1px solid #2f3b4f;
+        }
+        .sub {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 4px;
+            margin-bottom: 22px;
+            color: #7a8aa3;
+            font-size: 14px;
+        }
+        .sub .badge {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        .sub .badge span {
+            background: #1a2332;
+            padding: 4px 16px;
+            border-radius: 20px;
+            border: 1px solid #2b364b;
+            font-size: 13px;
+            color: #b0c0dd;
+        }
+        .sub .badge strong {
+            color: #d6e2ff;
+        }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 12px;
+            margin: 18px 0 22px;
+        }
+        .stats .card {
+            background: #111a28;
+            border-radius: 14px;
+            padding: 12px 16px;
+            border: 1px solid #253040;
+            text-align: center;
+        }
+        .stats .card .label {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            color: #6b7d9c;
+        }
+        .stats .card .value {
+            font-size: 20px;
+            font-weight: 600;
+            color: #eaf0ff;
+            margin-top: 2px;
+            font-variant-numeric: tabular-nums;
+        }
+        .stats .card .value.blue {
+            color: #6b9cf7;
+        }
+        .stats .card .value.green {
+            color: #6fcf97;
+        }
+        .stats .card .value.pink {
+            color: #f97373;
+        }
+        .stats .card .value.orange {
+            color: #f2a365;
+        }
+        .chart-wrap {
+            position: relative;
+            background: #0f151f;
+            border-radius: 16px;
+            padding: 18px 16px 10px;
+            border: 1px solid #232e40;
+            margin-top: 6px;
+        }
+        canvas {
+            width: 100% !important;
+            height: auto !important;
+            max-height: 480px;
+            border-radius: 10px;
+        }
+        .legend-tip {
+            display: flex;
+            justify-content: center;
+            gap: 32px;
+            margin-top: 16px;
+            font-size: 13px;
+            color: #a0b0cc;
+            flex-wrap: wrap;
+        }
+        .legend-tip .dot {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 3px;
+            margin-right: 6px;
+            vertical-align: middle;
+        }
+        .dot.loss {
+            background: #6b9cf7;
+        }
+        .data-table {
+            margin-top: 24px;
+            background: #0f151f;
+            border-radius: 14px;
+            border: 1px solid #232e40;
+            padding: 14px 18px;
+            overflow-x: auto;
+        }
+        .data-table table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+            color: #c0cef0;
+        }
+        .data-table th {
+            text-align: center;
+            padding: 8px 12px;
+            background: #1a2332;
+            color: #8e9bb5;
+            font-weight: 500;
+            border-bottom: 1px solid #2b364b;
+        }
+        .data-table td {
+            text-align: center;
+            padding: 8px 12px;
+            border-bottom: 1px solid #1f2a3a;
+        }
+        .data-table tr:last-child td {
+            border-bottom: none;
+        }
+        .data-table .highlight {
+            color: #6b9cf7;
+            font-weight: 600;
+        }
+        .footer {
+            margin-top: 24px;
+            text-align: center;
+            font-size: 12px;
+            color: #4d5f7a;
+            border-top: 1px solid #1f2a3a;
+            padding-top: 18px;
+            letter-spacing: 0.3px;
+        }
+        .footer a {
+            color: #6b9cf7;
+            text-decoration: none;
+        }
+        .footer a:hover {
+            text-decoration: underline;
+        }
+        @media (max-width: 700px) {
+            .container {
+                padding: 16px 14px 28px;
+            }
+            h1 {
+                font-size: 20px;
+            }
+            h1 small {
+                font-size: 12px;
+                padding: 2px 12px;
+            }
+            .stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .legend-tip {
+                gap: 16px;
+                font-size: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>
+            🗣️ AetherMind V4.0 Phase E 语言组织 SFT
+            <small>尾部微调 · 低学习率</small>
+        </h1>
+        <div class="sub">
+            <div class="badge">
+                <span>📐 d=384 · L=6 · h=6 · seq=512</span>
+                <span>⚡ batch=1 · grad_accum=8</span>
+                <span>📊 总步数 <strong>3,000</strong></span>
+                <span>🔓 可训练模块 <strong>89</strong></span>
+            </div>
+            <div style="color:#7a8aa3; font-size:13px;">
+                基座: <span style="color:#6b9cf7;">PhaseD (v4_checkpoint_2000_phaseD_final.pt)</span>
+            </div>
+        </div>
+
+        <div class="stats">
+            <div class="card">
+                <div class="label">最终 Loss</div>
+                <div class="value pink">9.78</div>
+            </div>
+            <div class="card">
+                <div class="label">最低 Loss</div>
+                <div class="value green">8.50</div>
+            </div>
+            <div class="card">
+                <div class="label">训练耗时</div>
+                <div class="value orange">~2.34 h</div>
+            </div>
+            <div class="card">
+                <div class="label">学习率</div>
+                <div class="value blue">1e-5</div>
+            </div>
+        </div>
+
+        <div class="chart-wrap">
+            <canvas id="phaseEChart"></canvas>
+        </div>
+
+        <div class="legend-tip">
+            <span><span class="dot loss"></span> 训练损失 (每 ~500 步记录)</span>
+            <span>🔄 恢复点: 500 步</span>
+        </div>
+
+        <!-- 数据表格 -->
+        <div class="data-table">
+            <table>
+                <thead>
+                    <tr>
+                        <th>步数</th>
+                        <th>训练损失</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td>670</td><td class="highlight">8.9792</td></tr>
+                    <tr><td>1000</td><td class="highlight">9.9342</td></tr>
+                    <tr><td>1500</td><td class="highlight">8.7938</td></tr>
+                    <tr><td>2000</td><td class="highlight">8.9332</td></tr>
+                    <tr><td>2500</td><td class="highlight">8.4983</td></tr>
+                    <tr><td>3000</td><td class="highlight">9.7811</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="footer">
+            Phase E 专训 · 解冻尾部 2 层 decoder + final_norm + lm_head · 数据: MOSS + Muice ·
+            运行 <a href="#" onclick="return false;">run_inference.cmd</a> 测试生成效果
+        </div>
+    </div>
+
+    <script>
+        // 注册 datalabels 插件
+        Chart.register(ChartDataLabels);
+
+        // 数据点
+        const steps = [670, 1000, 1500, 2000, 2500, 3000];
+        const losses = [8.9792, 9.9342, 8.7938, 8.9332, 8.4983, 9.7811];
+        // 为了显示恢复点，添加一个标记点（虚线或注释），这里我们在图表中用注释插件，但简单起见，在x轴标出恢复点。
+
+        const ctx = document.getElementById('phaseEChart').getContext('2d');
+
+        const chart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: steps,
+                datasets: [{
+                    label: '训练损失',
+                    data: losses,
+                    borderColor: '#6b9cf7',
+                    backgroundColor: 'rgba(107, 156, 247, 0.08)',
+                    borderWidth: 2.5,
+                    pointBackgroundColor: '#6b9cf7',
+                    pointBorderColor: '#d0e0ff',
+                    pointBorderWidth: 1.5,
+                    pointRadius: 6,
+                    pointHoverRadius: 9,
+                    tension: 0.3,
+                    fill: true,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                interaction: {
+                    mode: 'nearest',
+                    intersect: false,
+                    axis: 'x'
+                },
+                plugins: {
+                    legend: {
+                        labels: {
+                            color: '#b8c7e5',
+                            font: { size: 13, weight: '400' },
+                            boxWidth: 18,
+                            padding: 18,
+                            usePointStyle: true,
+                            pointStyle: 'line'
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(12, 18, 30, 0.9)',
+                        titleColor: '#dce6ff',
+                        bodyColor: '#c0cef0',
+                        borderColor: '#2f3b55',
+                        borderWidth: 1,
+                        padding: 12,
+                        cornerRadius: 10,
+                        callbacks: {
+                            label: function(context) {
+                                return `损失: ${context.parsed.y.toFixed(4)}`;
+                            }
+                        }
+                    },
+                    datalabels: {
+                        color: '#dce6ff',
+                        anchor: 'end',
+                        align: 'top',
+                        offset: 2,
+                        font: {
+                            size: 11,
+                            weight: '500'
+                        },
+                        formatter: function(value) {
+                            return value.toFixed(4);
+                        },
+                        display: function(context) {
+                            return true; // 所有点显示
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        type: 'linear',
+                        min: 0,
+                        max: 3200,
+                        grid: {
+                            color: 'rgba(60, 80, 110, 0.2)',
+                            drawTicks: true,
+                            tickColor: 'rgba(60, 80, 110, 0.3)'
+                        },
+                        ticks: {
+                            color: '#7a8aa3',
+                            font: { size: 11 },
+                            stepSize: 500,
+                            callback: function(value) {
+                                return value + '';
+                            }
+                        },
+                        title: {
+                            display: true,
+                            text: '训练步数',
+                            color: '#8e9bb5',
+                            font: { size: 13, weight: '400' }
+                        }
+                    },
+                    y: {
+                        min: 7.5,
+                        max: 10.5,
+                        grid: {
+                            color: 'rgba(60, 80, 110, 0.2)',
+                            drawTicks: true,
+                            tickColor: 'rgba(60, 80, 110, 0.3)'
+                        },
+                        ticks: {
+                            color: '#7a8aa3',
+                            font: { size: 11 },
+                            callback: function(value) {
+                                return value.toFixed(1);
+                            }
+                        },
+                        title: {
+                            display: true,
+                            text: '交叉熵损失',
+                            color: '#8e9bb5',
+                            font: { size: 13, weight: '400' }
+                        }
+                    }
+                },
+                elements: {
+                    line: {
+                        borderJoinStyle: 'round'
+                    }
+                },
+                animation: {
+                    duration: 800,
+                    easing: 'easeOutQuart'
+                }
+            },
+            plugins: [ChartDataLabels]
+        });
+
+        // 在图表绘制完成后，添加一个垂直虚线表示恢复点（500步）
+        // 通过自定义插件或使用annotations插件，这里简单用afterDraw
+        const recoveryPlugin = {
+            id: 'recoveryLine',
+            afterDraw(chart) {
+                const { ctx, chartArea: { left, top, right, bottom }, scales } = chart;
+                const xScale = scales.x;
+                if (!xScale) return;
+                const xPos = xScale.getPixelForValue(500);
+                if (xPos < left || xPos > right) return;
+                ctx.save();
+                ctx.beginPath();
+                ctx.moveTo(xPos, top);
+                ctx.lineTo(xPos, bottom);
+                ctx.strokeStyle = 'rgba(249, 115, 115, 0.5)';
+                ctx.lineWidth = 1.5;
+                ctx.setLineDash([6, 5]);
+                ctx.stroke();
+                ctx.fillStyle = 'rgba(249, 115, 115, 0.8)';
+                ctx.font = '11px "Segoe UI", sans-serif';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'bottom';
+                ctx.fillText('恢复点 (500)', xPos, bottom - 6);
+                ctx.restore();
+            }
+        };
+        chart.register(recoveryPlugin);
+    </script>
+
+</body>
+</html>

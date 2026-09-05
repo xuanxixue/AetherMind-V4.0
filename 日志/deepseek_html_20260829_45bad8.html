@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AetherMind V4.0 Phase F KG 对齐</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            background: #0b0e17;
+            font-family: 'Segoe UI', 'PingFang SC', Roboto, system-ui, sans-serif;
+            display: flex;
+            justify-content: center;
+            padding: 30px 20px;
+            color: #e0e6f0;
+        }
+        .container {
+            max-width: 1100px;
+            width: 100%;
+            background: #141a26;
+            border-radius: 24px;
+            padding: 28px 30px 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
+            border: 1px solid #2a3344;
+        }
+        h1 {
+            font-size: 26px;
+            font-weight: 600;
+            background: linear-gradient(135deg, #a78bfa, #6b9cf7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 6px;
+        }
+        h1 small {
+            font-size: 15px;
+            font-weight: 400;
+            background: #1f2a3a;
+            padding: 4px 16px;
+            border-radius: 30px;
+            -webkit-text-fill-color: #8e9bb5;
+            letter-spacing: 0.3px;
+            border: 1px solid #2f3b4f;
+        }
+        .sub {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 4px;
+            margin-bottom: 22px;
+            color: #7a8aa3;
+            font-size: 14px;
+        }
+        .sub .badge {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        .sub .badge span {
+            background: #1a2332;
+            padding: 4px 16px;
+            border-radius: 20px;
+            border: 1px solid #2b364b;
+            font-size: 13px;
+            color: #b0c0dd;
+        }
+        .sub .badge strong {
+            color: #d6e2ff;
+        }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 16px;
+            margin: 18px 0 30px;
+        }
+        .stats .card {
+            background: #111a28;
+            border-radius: 14px;
+            padding: 16px 20px;
+            border: 1px solid #253040;
+            text-align: center;
+        }
+        .stats .card .label {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            color: #6b7d9c;
+        }
+        .stats .card .value {
+            font-size: 28px;
+            font-weight: 700;
+            color: #eaf0ff;
+            margin-top: 4px;
+            font-variant-numeric: tabular-nums;
+        }
+        .stats .card .value.green {
+            color: #6fcf97;
+        }
+        .stats .card .value.blue {
+            color: #6b9cf7;
+        }
+        .stats .card .value.pink {
+            color: #f97373;
+        }
+        .stats .card .value.gold {
+            color: #fbbf24;
+        }
+        .stats .card .value.purple {
+            color: #a78bfa;
+        }
+        .result-highlight {
+            display: flex;
+            justify-content: center;
+            gap: 50px;
+            flex-wrap: wrap;
+            background: #0f151f;
+            border-radius: 16px;
+            padding: 24px 30px;
+            margin: 10px 0 20px;
+            border: 1px solid #232e40;
+        }
+        .result-item {
+            text-align: center;
+        }
+        .result-item .number {
+            font-size: 42px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #a78bfa, #6b9cf7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            line-height: 1.2;
+        }
+        .result-item .number.gold {
+            background: linear-gradient(135deg, #fbbf24, #f59e0b);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .result-item .number.green {
+            background: linear-gradient(135deg, #6fcf97, #27ae60);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .result-item .number.pink {
+            background: linear-gradient(135deg, #f97373, #ef4444);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .result-item .desc {
+            font-size: 14px;
+            color: #8e9bb5;
+            margin-top: 4px;
+        }
+        .data-table {
+            margin-top: 24px;
+            background: #0f151f;
+            border-radius: 14px;
+            border: 1px solid #232e40;
+            padding: 14px 18px;
+            overflow-x: auto;
+        }
+        .data-table table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+            color: #c0cef0;
+        }
+        .data-table th {
+            text-align: center;
+            padding: 8px 12px;
+            background: #1a2332;
+            color: #8e9bb5;
+            font-weight: 500;
+            border-bottom: 1px solid #2b364b;
+        }
+        .data-table td {
+            text-align: center;
+            padding: 8px 12px;
+            border-bottom: 1px solid #1f2a3a;
+        }
+        .data-table tr:last-child td {
+            border-bottom: none;
+        }
+        .data-table .highlight {
+            color: #a78bfa;
+            font-weight: 600;
+        }
+        .footer {
+            margin-top: 30px;
+            text-align: center;
+            font-size: 12px;
+            color: #4d5f7a;
+            border-top: 1px solid #1f2a3a;
+            padding-top: 18px;
+            letter-spacing: 0.3px;
+        }
+        .footer a {
+            color: #6b9cf7;
+            text-decoration: none;
+        }
+        .footer a:hover {
+            text-decoration: underline;
+        }
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #1f2a3a;
+            border-radius: 10px;
+            margin: 20px 0 10px;
+            overflow: hidden;
+        }
+        .progress-bar .fill {
+            height: 100%;
+            width: 100%;
+            background: linear-gradient(90deg, #6b9cf7, #a78bfa);
+            border-radius: 10px;
+        }
+        @media (max-width: 700px) {
+            .container {
+                padding: 16px 14px 28px;
+            }
+            h1 {
+                font-size: 20px;
+            }
+            h1 small {
+                font-size: 12px;
+                padding: 2px 12px;
+            }
+            .stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .result-highlight {
+                gap: 20px;
+                padding: 16px;
+            }
+            .result-item .number {
+                font-size: 30px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>
+            🧩 AetherMind V4.0 Phase F KG 对齐
+            <small>知识图谱注入</small>
+        </h1>
+        <div class="sub">
+            <div class="badge">
+                <span>📐 d=384 · L=6 · h=6 · seq=512</span>
+                <span>⚡ batch=1 · grad_accum=8</span>
+                <span>📊 步数 <strong>2,000</strong></span>
+                <span>🔓 可训练模块 <strong>4</strong></span>
+            </div>
+            <div style="color:#7a8aa3; font-size:13px;">
+                基座: <span style="color:#a78bfa;">PhaseE (v4_checkpoint_3000_phaseE_final.pt)</span>
+            </div>
+        </div>
+
+        <!-- 进度条 -->
+        <div class="progress-bar">
+            <div class="fill"></div>
+        </div>
+        <div style="text-align:right; font-size:12px; color:#6b7d9c; margin-top:4px;">已完成 2000 / 2000 步</div>
+
+        <!-- 关键结果 -->
+        <div class="result-highlight">
+            <div class="result-item">
+                <div class="number pink">1.5742</div>
+                <div class="desc">最终 Loss</div>
+            </div>
+            <div class="result-item">
+                <div class="number gold">0.002</div>
+                <div class="desc">s_pos (正样本相似度)</div>
+            </div>
+            <div class="result-item">
+                <div class="number green">-0.013</div>
+                <div class="desc">s_neg (负样本相似度)</div>
+            </div>
+            <div class="result-item">
+                <div class="number blue">174.8</div>
+                <div class="desc">步/秒 (速度)</div>
+            </div>
+        </div>
+
+        <div class="stats">
+            <div class="card">
+                <div class="label">KG 三元组</div>
+                <div class="value purple">8,011</div>
+            </div>
+            <div class="card">
+                <div class="label">KG 实体</div>
+                <div class="value purple">9,948</div>
+            </div>
+            <div class="card">
+                <div class="label">训练耗时</div>
+                <div class="value green">0.2 min</div>
+            </div>
+            <div class="card">
+                <div class="label">最终 τ</div>
+                <div class="value gold">42.10</div>
+            </div>
+        </div>
+
+        <!-- 数据表格（仅最终步） -->
+        <div class="data-table">
+            <table>
+                <thead>
+                    <tr>
+                        <th>步数</th>
+                        <th>Loss</th>
+                        <th>s_pos</th>
+                        <th>s_neg</th>
+                        <th>速度 (step/s)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>2000</strong></td>
+                        <td class="highlight">1.5742</td>
+                        <td class="highlight">0.002</td>
+                        <td class="highlight">-0.013</td>
+                        <td>174.8</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="footer">
+            Phase F 专训 · 冻结全部主干网络 · 仅训练 Entity→Atom 映射器 + logic C/E 关联矩阵 ·
+            KG 来自 <a href="#" onclick="return false;">03_dialogue/knowledge_graph.json</a> ·
+            运行 <a href="#" onclick="return false;">run_inference.cmd</a> 测试知识问答
+        </div>
+    </div>
+
+</body>
+</html>

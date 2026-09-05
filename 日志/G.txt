@@ -1,0 +1,194 @@
+============================================================
+  AetherMind V4.0 PHASE G - Clean Dialogue SFT
+  Load base: auto (PhaseF newest, else PhaseE/Final)
+  Unfreeze last 3 decoder layers + final_norm + lm_head
+  lr=3e-5, evolution/consolidation OFF
+  Data: CLEANED MOSS + Muice (system prompt stripped)
+  Tokenizer: Qwen2.5-0.5B  d=384  L=6  h=6  seq=512
+  phase_G=3000 steps
+============================================================
+
+[i] Goal: teach the model to CHAT normally (clean dialogue).
+[i] Run clean_dialogue_data.py first to produce 03_dialogue_clean.
+[i] Output: v4_checkpoint_*_phaseG_final.pt
+
+[Setup] 加载tokenizer...
+[Tokenizer] 加载Qwen2.5 tokenizer: D:\AetherMind-Nano3\models_local\Qwen\Qwen2___5-0___5B
+[Tokenizer] vocab_size=151643, pad=151643, eos=151643
+[Setup] tokenizer vocab_size=151643, 对齐后=151680, pad=151643, eos=151643
+======================================================================
+  AetherMind V4.0  息壤·双权重演化认知体  训练启动
+  模型: d_model=384, n_layers=6, n_heads=6, d_ff=1536, max_seq=512
+  训练: batch=1, grad_accum=8, lr=0.0003, total_steps=25000
+  三阶段: A=5000 / B=10000 / C=10000
+  输出: d:/AetherMind-Nano3/checkpoints_v4_fixed
+  数据: d:/AetherMind-Nano3/03_dialogue
+======================================================================
+[Setup] GPU显存守护：训练前清理...
+[GPU Guard] GPU总显存: 4096MB, 当前已用: 195MB
+[GPU Guard] 没有其他GPU进程，显存干净
+
+[Setup] 加载分词器...
+[Tokenizer] 加载Qwen2.5 tokenizer: D:\AetherMind-Nano3\models_local\Qwen\Qwen2___5-0___5B
+[Tokenizer] vocab_size=151643, pad=151643, eos=151643
+[Setup] 词汇表大小: 151680
+[Setup] 设备: cuda | NVIDIA GeForce RTX 3050 Laptop GPU | 4.0 GB
+[Setup] 构建V4模型 (双权重演化架构)...
+C:\Python312\Lib\site-packages\torch\nn\modules\module.py:1326: UserWarning: expandable_segments not supported on this platform (Triggered internally at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\c10/cuda/CUDAAllocatorConfig.h:28.)
+  return t.to(
+[Setup] 参数量: 101,090,592 (385.6 MB)
+[Setup] 构建数据集...
+[Data] train split: 58 files [clean_part_000000.jsonl(1MB), clean_part_000001.jsonl(1MB), clean_part_000002.jsonl(2MB) +55 more]
+[Data] eval split: 2 files [clean_part_000058.jsonl(5MB), clean_part_000059.jsonl(2MB)]
+[SelfCheck] 数据自检: 抽样1个batch验证形状...
+[Data] 发现 58 个文件, worker 负责 58 个
+[Data] 读取文件 1/58: clean_part_000056.jsonl (5.0MB)
+[SelfCheck] 通过: input_ids=(1, 512), labels=(1, 512), vocab_range=[11,151643]
+[Phase G] 从base checkpoint载入权重(步数归零): d:/AetherMind-Nano3/checkpoints_v4_fixed\v4_checkpoint_2000_phaseF_final.pt
+[Resume] 恢复成功: step=0, phase=G
+[Setup] 完成
+
+[Phase G] 解冻尾部3层decoder+final_norm+lm_head, 可训练模块数=132
+
+[Phase G] 纯净对话SFT 开始, 总步数: 3000, lr=3e-05
+[Phase G] 数据: d:/AetherMind-Nano3/03_dialogue_clean (已清洗 MOSS + Muice沐雪)
+[Phase G] base: auto(PhaseF优先, 否则PhaseE/Final)
+[Data] 发现 58 个文件, worker 负责 58 个
+[Data] 读取文件 1/58: clean_part_000004.jsonl (2.2MB)
+C:\Python312\Lib\site-packages\torch\optim\lr_scheduler.py:224: UserWarning: Detected call of `lr_scheduler.step()` before `optimizer.step()`. In PyTorch 1.1.0 and later, you should call them in the opposite order: `optimizer.step()` before `lr_scheduler.step()`.  Failure to do this will result in PyTorch skipping the first value of the learning rate schedule. See more details at https://pytorch.org/docs/stable/optim.html#how-to-adjust-learning-rate
+  warnings.warn(
+[Phase G] 500/3000 loss=7.3781 lr=2.87e-05 | 0.6 step/s bad=0
+[Save] d:/AetherMind-Nano3/checkpoints_v4_fixed\v4_checkpoint_500_phaseG.pt | tau_conc=42.10 cons_mass=792943.6
+[Phase G] 1000/3000 loss=7.4429 lr=2.50e-05 | 0.5 step/s bad=0
+[Save] d:/AetherMind-Nano3/checkpoints_v4_fixed\v4_checkpoint_1000_phaseG.pt | tau_conc=42.10 cons_mass=792943.6
+[Phase G] 1500/3000 loss=6.9995 lr=2.00e-05 | 0.4 step/s bad=0
+[Save] d:/AetherMind-Nano3/checkpoints_v4_fixed\v4_checkpoint_1500_phaseG.pt | tau_conc=42.10 cons_mass=792943.6
+[Phase G] 2000/3000 loss=8.3496 lr=1.50e-05 | 0.4 step/s bad=0
+[Save] d:/AetherMind-Nano3/checkpoints_v4_fixed\v4_checkpoint_2000_phaseG.pt | tau_conc=42.10 cons_mass=792943.6
+[Phase G] 2500/3000 loss=7.3607 lr=1.13e-05 | 0.4 step/s bad=0Traceback (most recent call last):
+  File "C:\Python312\Lib\site-packages\torch\serialization.py", line 850, in save
+    _save(
+  File "C:\Python312\Lib\site-packages\torch\serialization.py", line 1114, in _save
+    zip_file.write_record(name, storage, num_bytes)
+RuntimeError: [enforce fail at inline_container.cc:783] . PytorchStreamWriter failed writing file data/598: file write failed
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "D:\AetherMind-Nano3\src\training\train_v4.py", line 1090, in <module>
+    main()
+  File "D:\AetherMind-Nano3\src\training\train_v4.py", line 1086, in main
+    phase_g=args.phase_g).train()
+                          ^^^^^^^
+  File "D:\AetherMind-Nano3\src\training\train_v4.py", line 884, in train
+    self._train_phaseG()
+  File "D:\AetherMind-Nano3\src\training\train_v4.py", line 768, in _train_phaseG
+    self.save("_phaseG")
+  File "D:\AetherMind-Nano3\src\training\train_v4.py", line 534, in save
+    torch.save({
+  File "C:\Python312\Lib\site-packages\torch\serialization.py", line 849, in save
+    with _open_zipfile_writer(f) as opened_zipfile:
+  File "C:\Python312\Lib\site-packages\torch\serialization.py", line 690, in __exit__
+    self.file_like.write_end_of_file()
+RuntimeError: [enforce fail at inline_container.cc:603] . unexpected pos 982233920 vs 982233812
+'nd-Nano3' is not recognized as an internal or external command,
+operable program or batch file.
+
+============================================================
+  PHASE G DONE!
+  Latest: checkpoints_v4_fixed\v4_checkpoint_*_phaseG_final.pt
+  Run run_inference.cmd to chat with it.
+============================================================
+
+Press any key to continue . . .
+
+============================================================
+  AetherMind V4.0 PHASE G - Clean Dialogue SFT
+  Resume: step 2000 (v4_checkpoint_2000_phaseG.pt)
+  Unfreeze last 3 decoder layers + final_norm + lm_head
+  lr=3e-5, evolution/consolidation OFF
+  Data: CLEANED MOSS + Muice (system prompt stripped)
+  Tokenizer: Qwen2.5-0.5B  d=384  L=6  h=6  seq=512
+  phase_G=20000 steps (full-data, ~2/3 epoch)
+============================================================
+
+[i] Goal: teach the model to CHAT normally (clean dialogue).
+[i] Run clean_dialogue_data.py first to produce 03_dialogue_clean.
+[i] Output: v4_checkpoint_*_phaseG_final.pt
+
+[Setup] 加载tokenizer...
+[Tokenizer] 加载Qwen2.5 tokenizer: D:\AetherMind-Nano3\models_local\Qwen\Qwen2___5-0___5B
+[Tokenizer] vocab_size=151643, pad=151643, eos=151643
+[Setup] tokenizer vocab_size=151643, 对齐后=151680, pad=151643, eos=151643
+======================================================================
+  AetherMind V4.0  息壤·双权重演化认知体  训练启动
+  模型: d_model=384, n_layers=6, n_heads=6, d_ff=1536, max_seq=512
+  训练: batch=1, grad_accum=8, lr=0.0003, total_steps=25000
+  三阶段: A=5000 / B=10000 / C=10000
+  输出: d:/AetherMind-Nano3/checkpoints_v4_fixed
+  数据: d:/AetherMind-Nano3/03_dialogue
+======================================================================
+[Setup] GPU显存守护：训练前清理...
+[GPU Guard] GPU总显存: 4096MB, 当前已用: 209MB
+[GPU Guard] 没有其他GPU进程，显存干净
+
+[Setup] 加载分词器...
+[Tokenizer] 加载Qwen2.5 tokenizer: D:\AetherMind-Nano3\models_local\Qwen\Qwen2___5-0___5B
+[Tokenizer] vocab_size=151643, pad=151643, eos=151643
+[Setup] 词汇表大小: 151680
+[Setup] 设备: cuda | NVIDIA GeForce RTX 3050 Laptop GPU | 4.0 GB
+[Setup] 构建V4模型 (双权重演化架构)...
+C:\Python312\Lib\site-packages\torch\nn\modules\module.py:1326: UserWarning: expandable_segments not supported on this platform (Triggered internally at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\c10/cuda/CUDAAllocatorConfig.h:28.)
+  return t.to(
+[Setup] 参数量: 101,090,592 (385.6 MB)
+[Setup] 构建数据集...
+[Data] train split: 58 files [clean_part_000000.jsonl(1MB), clean_part_000001.jsonl(1MB), clean_part_000002.jsonl(2MB) +55 more]
+[Data] eval split: 2 files [clean_part_000058.jsonl(5MB), clean_part_000059.jsonl(2MB)]
+[SelfCheck] 数据自检: 抽样1个batch验证形状...
+[Data] 发现 58 个文件, worker 负责 58 个
+[Data] 读取文件 1/58: clean_part_000028.jsonl (5.1MB)
+[SelfCheck] 通过: input_ids=(1, 512), labels=(1, 512), vocab_range=[13,151643]
+[Phase G] 恢复对话SFT专训进度: d:/AetherMind-Nano3/checkpoints_v4_fixed\v4_checkpoint_2000_phaseG.pt
+[Resume] 恢复成功: step=2000, phase=G
+[Setup] 完成
+
+[Phase G] 解冻尾部3层decoder+final_norm+lm_head, 可训练模块数=132
+
+[Phase G] 纯净对话SFT 开始, 总步数: 20000, lr=3e-05
+[Phase G] 数据: d:/AetherMind-Nano3/03_dialogue_clean (已清洗 MOSS + Muice沐雪)
+[Phase G] base: d:/AetherMind-Nano3/checkpoints_v4_fixed/v4_checkpoint_2000_phaseG.pt
+[Data] 发现 58 个文件, worker 负责 58 个
+[Data] 读取文件 1/58: clean_part_000006.jsonl (2.2MB)
+C:\Python312\Lib\site-packages\torch\optim\lr_scheduler.py:224: UserWarning: Detected call of `lr_scheduler.step()` before `optimizer.step()`. In PyTorch 1.1.0 and later, you should call them in the opposite order: `optimizer.step()` before `lr_scheduler.step()`.  Failure to do this will result in PyTorch skipping the first value of the learning rate schedule. See more details at https://pytorch.org/docs/stable/optim.html#how-to-adjust-learning-rate
+  warnings.warn(
+[Phase G] 4000/20000 loss=7.4483 lr=2.95e-05 | 0.8 step/s bad=000
+[Save] d:/AetherMind-Nano3/checkpoints_v4_fixed\v4_checkpoint_4000_phaseG.pt | tau_conc=42.10 cons_mass=792943.6
+[Phase G] 6000/20000 loss=6.9852 lr=2.81e-05 | 0.6 step/s bad=0
+[Save] d:/AetherMind-Nano3/checkpoints_v4_fixed\v4_checkpoint_6000_phaseG.pt | tau_conc=42.10 cons_mass=792943.6
+[Phase G] 8000/20000 loss=7.0629 lr=2.59e-05 | 0.6 step/s bad=0
+[Save] d:/AetherMind-Nano3/checkpoints_v4_fixed\v4_checkpoint_8000_phaseG.pt | tau_conc=42.10 cons_mass=792943.6
+[Phase G] 10000/20000 loss=8.1045 lr=2.31e-05 | 0.6 step/s bad=0
+[Save] d:/AetherMind-Nano3/checkpoints_v4_fixed\v4_checkpoint_10000_phaseG.pt | tau_conc=42.10 cons_mass=792943.6
+[Phase G] 12000/20000 loss=5.6969 lr=2.00e-05 | 0.5 step/s bad=0
+[Save] d:/AetherMind-Nano3/checkpoints_v4_fixed\v4_checkpoint_12000_phaseG.pt | tau_conc=42.10 cons_mass=792943.6
+[Phase G] 14000/20000 loss=5.0935 lr=1.69e-05 | 0.5 step/s bad=0
+[Save] d:/AetherMind-Nano3/checkpoints_v4_fixed\v4_checkpoint_14000_phaseG.pt | tau_conc=42.10 cons_mass=792943.6
+[Phase G] 16000/20000 loss=6.7211 lr=1.41e-05 | 0.5 step/s bad=0
+[Save] d:/AetherMind-Nano3/checkpoints_v4_fixed\v4_checkpoint_16000_phaseG.pt | tau_conc=42.10 cons_mass=792943.6
+[Phase G] 18000/20000 loss=6.5984 lr=1.19e-05 | 0.5 step/s bad=0
+[Save] d:/AetherMind-Nano3/checkpoints_v4_fixed\v4_checkpoint_18000_phaseG.pt | tau_conc=42.10 cons_mass=792943.6
+[Data] 读取文件 5/58: clean_part_000056.jsonl (5.0MB)
+[Phase G] 20000/20000 loss=6.5973 lr=1.05e-05 | 0.5 step/s bad=0
+[Save] d:/AetherMind-Nano3/checkpoints_v4_fixed\v4_checkpoint_20000_phaseG.pt | tau_conc=42.10 cons_mass=792943.6
+
+[Phase G] 完成! 耗时 622.4min | bad_batches=0
+
+[Save] d:/AetherMind-Nano3/checkpoints_v4_fixed\v4_checkpoint_20000_phaseG_final.pt | tau_conc=42.10 cons_mass=792943.6
+
+============================================================
+  PHASE G DONE!
+  Latest: checkpoints_v4_fixed\v4_checkpoint_*_phaseG_final.pt
+  Run run_inference.cmd to chat with it.
+============================================================
+
+Press any key to continue . . .

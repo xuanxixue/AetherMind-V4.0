@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AetherMind V4.0 Phase G 完整训练曲线</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js">
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js">
+    </script>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            background: #0b0e17;
+            font-family: 'Segoe UI', 'PingFang SC', Roboto, system-ui, sans-serif;
+            display: flex;
+            justify-content: center;
+            padding: 30px 20px;
+            color: #e0e6f0;
+        }
+        .container {
+            max-width: 1300px;
+            width: 100%;
+            background: #141a26;
+            border-radius: 24px;
+            padding: 28px 30px 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
+            border: 1px solid #2a3344;
+        }
+        h1 {
+            font-size: 26px;
+            font-weight: 600;
+            background: linear-gradient(135deg, #6fcf97, #27ae60);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 6px;
+        }
+        h1 small {
+            font-size: 15px;
+            font-weight: 400;
+            background: #1f2a3a;
+            padding: 4px 16px;
+            border-radius: 30px;
+            -webkit-text-fill-color: #8e9bb5;
+            letter-spacing: 0.3px;
+            border: 1px solid #2f3b4f;
+        }
+        .sub {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 4px;
+            margin-bottom: 22px;
+            color: #7a8aa3;
+            font-size: 14px;
+        }
+        .sub .badge {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        .sub .badge span {
+            background: #1a2332;
+            padding: 4px 16px;
+            border-radius: 20px;
+            border: 1px solid #2b364b;
+            font-size: 13px;
+            color: #b0c0dd;
+        }
+        .sub .badge strong {
+            color: #d6e2ff;
+        }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 12px;
+            margin: 18px 0 22px;
+        }
+        .stats .card {
+            background: #111a28;
+            border-radius: 14px;
+            padding: 12px 16px;
+            border: 1px solid #253040;
+            text-align: center;
+        }
+        .stats .card .label {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            color: #6b7d9c;
+        }
+        .stats .card .value {
+            font-size: 20px;
+            font-weight: 600;
+            color: #eaf0ff;
+            margin-top: 2px;
+            font-variant-numeric: tabular-nums;
+        }
+        .stats .card .value.green {
+            color: #6fcf97;
+        }
+        .stats .card .value.blue {
+            color: #6b9cf7;
+        }
+        .stats .card .value.pink {
+            color: #f97373;
+        }
+        .stats .card .value.orange {
+            color: #f2a365;
+        }
+        .stats .card .value.purple {
+            color: #a78bfa;
+        }
+        .chart-wrap {
+            position: relative;
+            background: #0f151f;
+            border-radius: 16px;
+            padding: 18px 16px 10px;
+            border: 1px solid #232e40;
+            margin-top: 6px;
+        }
+        canvas {
+            width: 100% !important;
+            height: auto !important;
+            max-height: 480px;
+            border-radius: 10px;
+        }
+        .legend-tip {
+            display: flex;
+            justify-content: center;
+            gap: 32px;
+            margin-top: 16px;
+            font-size: 13px;
+            color: #a0b0cc;
+            flex-wrap: wrap;
+        }
+        .legend-tip .dot {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 3px;
+            margin-right: 6px;
+            vertical-align: middle;
+        }
+        .dot.loss {
+            background: #6fcf97;
+        }
+        .dot.lr {
+            background: #fbbf24;
+        }
+        .data-table {
+            margin-top: 24px;
+            background: #0f151f;
+            border-radius: 14px;
+            border: 1px solid #232e40;
+            padding: 14px 18px;
+            overflow-x: auto;
+        }
+        .data-table table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+            color: #c0cef0;
+        }
+        .data-table th {
+            text-align: center;
+            padding: 8px 12px;
+            background: #1a2332;
+            color: #8e9bb5;
+            font-weight: 500;
+            border-bottom: 1px solid #2b364b;
+        }
+        .data-table td {
+            text-align: center;
+            padding: 8px 12px;
+            border-bottom: 1px solid #1f2a3a;
+        }
+        .data-table tr:last-child td {
+            border-bottom: none;
+        }
+        .data-table .highlight-loss {
+            color: #6fcf97;
+            font-weight: 600;
+        }
+        .data-table .highlight-lr {
+            color: #fbbf24;
+            font-weight: 600;
+        }
+        .data-table .interrupt {
+            color: #f97373;
+            font-weight: 600;
+        }
+        .data-table .resume {
+            color: #a78bfa;
+            font-weight: 600;
+        }
+        .footer {
+            margin-top: 24px;
+            text-align: center;
+            font-size: 12px;
+            color: #4d5f7a;
+            border-top: 1px solid #1f2a3a;
+            padding-top: 18px;
+            letter-spacing: 0.3px;
+        }
+        .footer a {
+            color: #6b9cf7;
+            text-decoration: none;
+        }
+        .footer a:hover {
+            text-decoration: underline;
+        }
+        @media (max-width: 700px) {
+            .container {
+                padding: 16px 14px 28px;
+            }
+            h1 {
+                font-size: 20px;
+            }
+            h1 small {
+                font-size: 12px;
+                padding: 2px 12px;
+            }
+            .stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .legend-tip {
+                gap: 16px;
+                font-size: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>
+            💬 AetherMind V4.0 Phase G 完整训练
+            <small>纯净对话 SFT · 恢复后连续训练</small>
+        </h1>
+        <div class="sub">
+            <div class="badge">
+                <span>📐 d=384 · L=6 · h=6 · seq=512</span>
+                <span>⚡ batch=1 · grad_accum=8</span>
+                <span>📊 总步数 <strong>20,000</strong></span>
+                <span>🔓 可训练模块 <strong>132</strong></span>
+                <span>📁 数据文件 <strong>58</strong></span>
+            </div>
+            <div style="color:#7a8aa3; font-size:13px;">
+                基座: <span style="color:#6fcf97;">PhaseF</span> · 恢复点: <span style="color:#a78bfa;">2000</span>
+            </div>
+        </div>
+
+        <div class="stats">
+            <div class="card">
+                <div class="label">最终 Loss</div>
+                <div class="value pink">6.5973</div>
+            </div>
+            <div class="card">
+                <div class="label">最低 Loss</div>
+                <div class="value green">5.0935</div>
+            </div>
+            <div class="card">
+                <div class="label">总训练耗时</div>
+                <div class="value blue">~10.4 h</div>
+            </div>
+            <div class="card">
+                <div class="label">起始学习率</div>
+                <div class="value orange">3e-5</div>
+            </div>
+        </div>
+
+        <div class="chart-wrap">
+            <canvas id="phaseGChart"></canvas>
+        </div>
+
+        <div class="legend-tip">
+            <span><span class="dot loss"></span> 训练损失</span>
+            <span><span class="dot lr"></span> 学习率 (×10⁻⁵)</span>
+            <span style="color:#f97373;">⛔ 中断点 (2500)</span>
+            <span style="color:#a78bfa;">↻ 恢复点 (2000)</span>
+        </div>
+
+        <!-- 数据表格 -->
+        <div class="data-table">
+            <table>
+                <thead>
+                    <tr>
+                        <th>步数</th>
+                        <th>训练损失</th>
+                        <th>学习率 (×10⁻⁵)</th>
+                        <th>备注</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td>500</td><td class="highlight-loss">7.3781</td><td class="highlight-lr">2.87</td><td></td></tr>
+                    <tr><td>1000</td><td class="highlight-loss">7.4429</td><td class="highlight-lr">2.50</td><td></td></tr>
+                    <tr><td>1500</td><td class="highlight-loss">6.9995</td><td class="highlight-lr">2.00</td><td></td></tr>
+                    <tr><td>2000</td><td class="highlight-loss">8.3496</td><td class="highlight-lr">1.50</td><td class="resume">恢复点</td></tr>
+                    <tr><td>2500</td><td class="highlight-loss">7.3607</td><td class="highlight-lr">1.13</td><td class="interrupt">⚠️ 中断 (保存失败)</td></tr>
+                    <tr><td>4000</td><td class="highlight-loss">7.4483</td><td class="highlight-lr">2.95</td><td>恢复后</td></tr>
+                    <tr><td>6000</td><td class="highlight-loss">6.9852</td><td class="highlight-lr">2.81</td><td></td></tr>
+                    <tr><td>8000</td><td class="highlight-loss">7.0629</td><td class="highlight-lr">2.59</td><td></td></tr>
+                    <tr><td>10000</td><td class="highlight-loss">8.1045</td><td class="highlight-lr">2.31</td><td></td></tr>
+                    <tr><td>12000</td><td class="highlight-loss">5.6969</td><td class="highlight-lr">2.00</td><td></td></tr>
+                    <tr><td>14000</td><td class="highlight-loss">5.0935</td><td class="highlight-lr">1.69</td><td>🏆 最低损失</td></tr>
+                    <tr><td>16000</td><td class="highlight-loss">6.7211</td><td class="highlight-lr">1.41</td><td></td></tr>
+                    <tr><td>18000</td><td class="highlight-loss">6.5984</td><td class="highlight-lr">1.19</td><td></td></tr>
+                    <tr><td>20000</td><td class="highlight-loss">6.5973</td><td class="highlight-lr">1.05</td><td>✅ 完成</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="footer">
+            Phase G 专训 · 解冻尾部 3 层 decoder + final_norm + lm_head · 数据: 清洗后的 MOSS + Muice ·
+            第一次运行中断于 2500 步，从 2000 步检查点恢复后完成 20,000 步。
+            运行 <a href="#" onclick="return false;">run_inference.cmd</a> 测试对话效果
+        </div>
+    </div>
+
+    <script>
+        // 注册 datalabels
+        Chart.register(ChartDataLabels);
+
+        // 数据点
+        const steps = [500, 1000, 1500, 2000, 2500, 4000, 6000, 8000, 10000, 12000, 14000, 16000, 18000, 20000];
+        const losses = [7.3781, 7.4429, 6.9995, 8.3496, 7.3607, 7.4483, 6.9852, 7.0629, 8.1045, 5.6969, 5.0935, 6.7211, 6.5984, 6.5973];
+        const lrValues = [2.87, 2.50, 2.00, 1.50, 1.13, 2.95, 2.81, 2.59, 2.31, 2.00, 1.69, 1.41, 1.19, 1.05]; // ×10⁻⁵
+
+        const ctx = document.getElementById('phaseGChart').getContext('2d');
+
+        const chart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: steps,
+                datasets: [{
+                    label: '训练损失',
+                    data: losses,
+                    borderColor: '#6fcf97',
+                    backgroundColor: 'rgba(111, 207, 151, 0.08)',
+                    borderWidth: 2.5,
+                    pointBackgroundColor: '#6fcf97',
+                    pointBorderColor: '#b8f0d0',
+                    pointBorderWidth: 1.5,
+                    pointRadius: 6,
+                    pointHoverRadius: 9,
+                    tension: 0.3,
+                    fill: true,
+                    yAxisID: 'y',
+                    order: 1
+                }, {
+                    label: '学习率 (×10⁻⁵)',
+                    data: lrValues,
+                    borderColor: '#fbbf24',
+                    backgroundColor: 'rgba(251, 191, 36, 0.05)',
+                    borderWidth: 2,
+                    pointBackgroundColor: '#fbbf24',
+                    pointBorderColor: '#fff5d0',
+                    pointBorderWidth: 1,
+                    pointRadius: 5,
+                    pointHoverRadius: 8,
+                    tension: 0.2,
+                    fill: false,
+                    borderDash: [5, 3],
+                    yAxisID: 'y1',
+                    order: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                interaction: {
+                    mode: 'nearest',
+                    intersect: false,
+                    axis: 'x'
+                },
+                plugins: {
+                    legend: {
+                        labels: {
+                            color: '#b8c7e5',
+                            font: { size: 13, weight: '400' },
+                            boxWidth: 18,
+                            padding: 18,
+                            usePointStyle: true,
+                            pointStyle: 'line'
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(12, 18, 30, 0.9)',
+                        titleColor: '#dce6ff',
+                        bodyColor: '#c0cef0',
+                        borderColor: '#2f3b55',
+                        borderWidth: 1,
+                        padding: 12,
+                        cornerRadius: 10,
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.dataset.label || '';
+                                let val = context.parsed.y;
+                                if (context.datasetIndex === 0) {
+                                    return `${label}: ${val.toFixed(4)}`;
+                                } else {
+                                    return `${label}: ${val.toFixed(2)}`;
+                                }
+                            },
+                            afterBody: function(items) {
+                                const step = items[0].parsed.x;
+                                if (step === 2500) return '⚠️ 保存失败中断';
+                                if (step === 2000) return '↻ 恢复点';
+                                if (step === 14000) return '🏆 最低损失';
+                                return '';
+                            }
+                        }
+                    },
+                    datalabels: {
+                        color: '#dce6ff',
+                        anchor: 'end',
+                        align: 'top',
+                        offset: 2,
+                        font: {
+                            size: 9,
+                            weight: '500'
+                        },
+                        formatter: function(value, context) {
+                            if (context.datasetIndex === 0) {
+                                return value.toFixed(4);
+                            } else {
+                                return value.toFixed(2);
+                            }
+                        },
+                        display: function(context) {
+                            // 只显示部分点，避免拥挤：步数能被2000整除或特殊点
+                            const step = context.chart.data.labels[context.dataIndex];
+                            if (step % 2000 === 0 || step === 2500 || step === 14000) return true;
+                            return false;
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        type: 'linear',
+                        min: 0,
+                        max: 21000,
+                        grid: {
+                            color: 'rgba(60, 80, 110, 0.2)',
+                            drawTicks: true,
+                            tickColor: 'rgba(60, 80, 110, 0.3)'
+                        },
+                        ticks: {
+                            color: '#7a8aa3',
+                            font: { size: 11 },
+                            stepSize: 2000,
+                            callback: function(value) {
+                                if (value === 0) return '0';
+                                if (value === 20000) return '20k';
+                                return value / 1000 + 'k';
+                            }
+                        },
+                        title: {
+                            display: true,
+                            text: '训练步数',
+                            color: '#8e9bb5',
+                            font: { size: 13, weight: '400' }
+                        }
+                    },
+                    y: {
+                        type: 'linear',
+                        position: 'left',
+                        min: 4.5,
+                        max: 9.0,
+                        grid: {
+                            color: 'rgba(60, 80, 110, 0.2)',
+                            drawTicks: true,
+                            tickColor: 'rgba(60, 80, 110, 0.3)'
+                        },
+                        ticks: {
+                            color: '#6fcf97',
+                            font: { size: 11 },
+                            callback: function(value) {
+                                return value.toFixed(1);
+                            }
+                        },
+                        title: {
+                            display: true,
+                            text: '损失',
+                            color: '#6fcf97',
+                            font: { size: 13, weight: '400' }
+                        }
+                    },
+                    y1: {
+                        type: 'linear',
+                        position: 'right',
+                        min: 0.8,
+                        max: 3.5,
+                        grid: {
+                            drawOnChartArea: false,
+                            color: 'rgba(60, 80, 110, 0.1)'
+                        },
+                        ticks: {
+                            color: '#fbbf24',
+                            font: { size: 11 },
+                            callback: function(value) {
+                                return value.toFixed(1);
+                            }
+                        },
+                        title: {
+                            display: true,
+                            text: '学习率 (×10⁻⁵)',
+                            color: '#fbbf24',
+                            font: { size: 13, weight: '400' }
+                        }
+                    }
+                },
+                elements: {
+                    line: {
+                        borderJoinStyle: 'round'
+                    }
+                },
+                animation: {
+                    duration: 800,
+                    easing: 'easeOutQuart'
+                }
+            },
+            plugins: [ChartDataLabels]
+        });
+
+        // 自定义插件：标记中断和恢复点
+        const markPlugin = {
+            id: 'markLines',
+            afterDraw(chart) {
+                const { ctx, chartArea: { left, top, right, bottom }, scales } = chart;
+                const xScale = scales.x;
+                if (!xScale) return;
+
+                // 中断点 2500
+                const x1 = xScale.getPixelForValue(2500);
+                if (x1 >= left && x1 <= right) {
+                    ctx.save();
+                    ctx.beginPath();
+                    ctx.moveTo(x1, top);
+                    ctx.lineTo(x1, bottom);
+                    ctx.strokeStyle = 'rgba(249, 115, 115, 0.7)';
+                    ctx.lineWidth = 2;
+                    ctx.setLineDash([6, 4]);
+                    ctx.stroke();
+                    ctx.fillStyle = '#f97373';
+                    ctx.font = '11px "Segoe UI", sans-serif';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'bottom';
+                    ctx.fillText('⛔ 中断', x1, bottom - 6);
+                    ctx.restore();
+                }
+
+                // 恢复点 2000
+                const x2 = xScale.getPixelForValue(2000);
+                if (x2 >= left && x2 <= right) {
+                    ctx.save();
+                    ctx.beginPath();
+                    ctx.moveTo(x2, top);
+                    ctx.lineTo(x2, bottom);
+                    ctx.strokeStyle = 'rgba(167, 139, 250, 0.7)';
+                    ctx.lineWidth = 2;
+                    ctx.setLineDash([4, 4]);
+                    ctx.stroke();
+                    ctx.fillStyle = '#a78bfa';
+                    ctx.font = '11px "Segoe UI", sans-serif';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'bottom';
+                    ctx.fillText('↻ 恢复', x2, bottom - 6);
+                    ctx.restore();
+                }
+            }
+        };
+        chart.register(markPlugin);
+    </script>
+
+</body>
+</html>

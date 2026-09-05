@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AetherMind V4.0 Phase D 固化曲线</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js">
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js">
+    </script>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            background: #0b0e17;
+            font-family: 'Segoe UI', 'PingFang SC', Roboto, system-ui, sans-serif;
+            display: flex;
+            justify-content: center;
+            padding: 30px 20px;
+            color: #e0e6f0;
+        }
+        .container {
+            max-width: 1300px;
+            width: 100%;
+            background: #141a26;
+            border-radius: 24px;
+            padding: 28px 30px 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
+            border: 1px solid #2a3344;
+        }
+        h1 {
+            font-size: 26px;
+            font-weight: 600;
+            background: linear-gradient(135deg, #fbbf24, #f97373);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 6px;
+        }
+        h1 small {
+            font-size: 15px;
+            font-weight: 400;
+            background: #1f2a3a;
+            padding: 4px 16px;
+            border-radius: 30px;
+            -webkit-text-fill-color: #8e9bb5;
+            letter-spacing: 0.3px;
+            border: 1px solid #2f3b4f;
+        }
+        .sub {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 4px;
+            margin-bottom: 22px;
+            color: #7a8aa3;
+            font-size: 14px;
+        }
+        .sub .badge {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        .sub .badge span {
+            background: #1a2332;
+            padding: 4px 16px;
+            border-radius: 20px;
+            border: 1px solid #2b364b;
+            font-size: 13px;
+            color: #b0c0dd;
+        }
+        .sub .badge strong {
+            color: #d6e2ff;
+        }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 12px;
+            margin: 18px 0 22px;
+        }
+        .stats .card {
+            background: #111a28;
+            border-radius: 14px;
+            padding: 12px 16px;
+            border: 1px solid #253040;
+            text-align: center;
+        }
+        .stats .card .label {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            color: #6b7d9c;
+        }
+        .stats .card .value {
+            font-size: 20px;
+            font-weight: 600;
+            color: #eaf0ff;
+            margin-top: 2px;
+            font-variant-numeric: tabular-nums;
+        }
+        .stats .card .value.gold {
+            color: #fbbf24;
+        }
+        .stats .card .value.green {
+            color: #6fcf97;
+        }
+        .stats .card .value.blue {
+            color: #6b9cf7;
+        }
+        .stats .card .value.pink {
+            color: #f97373;
+        }
+        .chart-wrap {
+            position: relative;
+            background: #0f151f;
+            border-radius: 16px;
+            padding: 18px 16px 10px;
+            border: 1px solid #232e40;
+            margin-top: 6px;
+        }
+        canvas {
+            width: 100% !important;
+            height: auto !important;
+            max-height: 500px;
+            border-radius: 10px;
+        }
+        .legend-tip {
+            display: flex;
+            justify-content: center;
+            gap: 32px;
+            margin-top: 16px;
+            font-size: 13px;
+            color: #a0b0cc;
+            flex-wrap: wrap;
+        }
+        .legend-tip .dot {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 3px;
+            margin-right: 6px;
+            vertical-align: middle;
+        }
+        .dot.tau {
+            background: #fbbf24;
+        }
+        .dot.cons {
+            background: #f97373;
+        }
+        .data-table {
+            margin-top: 24px;
+            background: #0f151f;
+            border-radius: 14px;
+            border: 1px solid #232e40;
+            padding: 14px 18px;
+            overflow-x: auto;
+        }
+        .data-table table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+            color: #c0cef0;
+        }
+        .data-table th {
+            text-align: center;
+            padding: 8px 12px;
+            background: #1a2332;
+            color: #8e9bb5;
+            font-weight: 500;
+            border-bottom: 1px solid #2b364b;
+        }
+        .data-table td {
+            text-align: center;
+            padding: 8px 12px;
+            border-bottom: 1px solid #1f2a3a;
+        }
+        .data-table tr:last-child td {
+            border-bottom: none;
+        }
+        .data-table .highlight {
+            color: #fbbf24;
+            font-weight: 600;
+        }
+        .data-table .highlight-cons {
+            color: #f97373;
+            font-weight: 600;
+        }
+        .footer {
+            margin-top: 24px;
+            text-align: center;
+            font-size: 12px;
+            color: #4d5f7a;
+            border-top: 1px solid #1f2a3a;
+            padding-top: 18px;
+            letter-spacing: 0.3px;
+        }
+        .footer a {
+            color: #6b9cf7;
+            text-decoration: none;
+        }
+        .footer a:hover {
+            text-decoration: underline;
+        }
+        @media (max-width: 700px) {
+            .container {
+                padding: 16px 14px 28px;
+            }
+            h1 {
+                font-size: 20px;
+            }
+            h1 small {
+                font-size: 12px;
+                padding: 2px 12px;
+            }
+            .stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .legend-tip {
+                gap: 16px;
+                font-size: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>
+            🧬 AetherMind V4.0 Phase D 固化训练
+            <small>LTP Consolidation</small>
+        </h1>
+        <div class="sub">
+            <div class="badge">
+                <span>📐 d=384 · L=6 · h=6 · seq=512</span>
+                <span>⚡ batch=1 · grad_accum=8</span>
+                <span>📊 总步数 <strong>2,000</strong></span>
+                <span>🔄 rounds <strong>39</strong></span>
+            </div>
+            <div style="color:#7a8aa3; font-size:13px;">
+                基座: <span style="color:#fbbf24;">v4_checkpoint_35000_final.pt</span>
+            </div>
+        </div>
+
+        <div class="stats">
+            <div class="card">
+                <div class="label">最终 τ (信息素)</div>
+                <div class="value gold">42.10</div>
+            </div>
+            <div class="card">
+                <div class="label">最终 cons_mass</div>
+                <div class="value pink">792,944</div>
+            </div>
+            <div class="card">
+                <div class="label">固化轮次</div>
+                <div class="value blue">39</div>
+            </div>
+            <div class="card">
+                <div class="label">训练耗时</div>
+                <div class="value green">~25 min</div>
+            </div>
+        </div>
+
+        <div class="chart-wrap">
+            <canvas id="phaseDChart"></canvas>
+        </div>
+
+        <div class="legend-tip">
+            <span><span class="dot tau"></span> τ (信息素浓度)</span>
+            <span><span class="dot cons"></span> cons_mass (固化质量)</span>
+        </div>
+
+        <!-- 数据表格 -->
+        <div class="data-table">
+            <table>
+                <thead>
+                    <tr>
+                        <th>步数</th>
+                        <th>τ (tau)</th>
+                        <th>cons_mass</th>
+                        <th>rounds</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td>500</td><td class="highlight">42.20</td><td class="highlight-cons">742,743.4</td><td>9</td></tr>
+                    <tr><td>1000</td><td class="highlight">42.54</td><td class="highlight-cons">769,690.8</td><td>19</td></tr>
+                    <tr><td>1500</td><td class="highlight">42.10</td><td class="highlight-cons">792,943.6</td><td>29</td></tr>
+                    <tr><td>2000</td><td class="highlight">42.10</td><td class="highlight-cons">792,943.6</td><td>39</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="footer">
+            Phase D 专训 · 基座权重冻结 · τ 信息素网络演化 + 分位数固化 ·
+            运行 <a href="#" onclick="return false;">run_inference.cmd</a> 验证结果
+        </div>
+    </div>
+
+    <script>
+        // -------- 数据 --------
+        const steps = [500, 1000, 1500, 2000];
+        const tauData = [42.20, 42.54, 42.10, 42.10];
+        const consData = [742743.4, 769690.8, 792943.6, 792943.6];
+        const roundsData = [9, 19, 29, 39];
+
+        // -------- 注册 datalabels 插件 (全局) --------
+        Chart.register(ChartDataLabels);
+
+        const ctx = document.getElementById('phaseDChart').getContext('2d');
+
+        const chart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: steps,
+                datasets: [{
+                    label: 'τ (信息素)',
+                    data: tauData,
+                    borderColor: '#fbbf24',
+                    backgroundColor: 'rgba(251, 191, 36, 0.08)',
+                    borderWidth: 2.5,
+                    pointBackgroundColor: '#fbbf24',
+                    pointBorderColor: '#fff5d0',
+                    pointBorderWidth: 1.5,
+                    pointRadius: 6,
+                    pointHoverRadius: 9,
+                    tension: 0.2,
+                    fill: true,
+                    yAxisID: 'y',
+                    order: 1
+                }, {
+                    label: 'cons_mass (固化质量)',
+                    data: consData,
+                    borderColor: '#f97373',
+                    backgroundColor: 'rgba(249, 115, 115, 0.08)',
+                    borderWidth: 2.5,
+                    pointBackgroundColor: '#f97373',
+                    pointBorderColor: '#ffc2c2',
+                    pointBorderWidth: 1.5,
+                    pointRadius: 6,
+                    pointHoverRadius: 9,
+                    tension: 0.2,
+                    fill: true,
+                    yAxisID: 'y1',
+                    order: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                interaction: {
+                    mode: 'nearest',
+                    intersect: false,
+                    axis: 'x'
+                },
+                plugins: {
+                    legend: {
+                        labels: {
+                            color: '#b8c7e5',
+                            font: { size: 13, weight: '400' },
+                            boxWidth: 18,
+                            padding: 18,
+                            usePointStyle: true,
+                            pointStyle: 'line'
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(12, 18, 30, 0.9)',
+                        titleColor: '#dce6ff',
+                        bodyColor: '#c0cef0',
+                        borderColor: '#2f3b55',
+                        borderWidth: 1,
+                        padding: 12,
+                        cornerRadius: 10,
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.dataset.label || '';
+                                let val = context.parsed.y;
+                                if (context.datasetIndex === 0) {
+                                    return `${label}: ${val.toFixed(2)}`;
+                                } else {
+                                    return `${label}: ${val.toFixed(1)}`;
+                                }
+                            },
+                            afterBody: function(items) {
+                                const step = items[0].parsed.x;
+                                // 找到对应的 rounds
+                                const idx = steps.indexOf(step);
+                                if (idx !== -1) {
+                                    return `rounds: ${roundsData[idx]}`;
+                                }
+                                return '';
+                            }
+                        }
+                    },
+                    // datalabels 插件配置：在每个点上显示数值
+                    datalabels: {
+                        color: '#dce6ff',
+                        anchor: 'end',
+                        align: 'top',
+                        offset: 2,
+                        font: {
+                            size: 11,
+                            weight: '500'
+                        },
+                        formatter: function(value, context) {
+                            if (context.datasetIndex === 0) {
+                                return value.toFixed(2);
+                            } else {
+                                // 对于 cons_mass，显示为整数（千分位）
+                                return Math.round(value).toLocaleString();
+                            }
+                        },
+                        // 只显示在数据点上（每个点都显示）
+                        display: function(context) {
+                            return true;
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        type: 'linear',
+                        min: 0,
+                        max: 2200,
+                        grid: {
+                            color: 'rgba(60, 80, 110, 0.2)',
+                            drawTicks: true,
+                            tickColor: 'rgba(60, 80, 110, 0.3)'
+                        },
+                        ticks: {
+                            color: '#7a8aa3',
+                            font: { size: 11 },
+                            stepSize: 500,
+                            callback: function(value) {
+                                return value + '';
+                            }
+                        },
+                        title: {
+                            display: true,
+                            text: '训练步数',
+                            color: '#8e9bb5',
+                            font: { size: 13, weight: '400' }
+                        }
+                    },
+                    y: {
+                        type: 'linear',
+                        position: 'left',
+                        min: 41.5,
+                        max: 43.0,
+                        grid: {
+                            color: 'rgba(60, 80, 110, 0.2)',
+                            drawTicks: true,
+                            tickColor: 'rgba(60, 80, 110, 0.3)'
+                        },
+                        ticks: {
+                            color: '#fbbf24',
+                            font: { size: 11 },
+                            callback: function(value) {
+                                return value.toFixed(1);
+                            }
+                        },
+                        title: {
+                            display: true,
+                            text: 'τ 值',
+                            color: '#fbbf24',
+                            font: { size: 13, weight: '400' }
+                        }
+                    },
+                    y1: {
+                        type: 'linear',
+                        position: 'right',
+                        min: 730000,
+                        max: 810000,
+                        grid: {
+                            drawOnChartArea: false, // 避免重叠网格
+                            color: 'rgba(60, 80, 110, 0.1)'
+                        },
+                        ticks: {
+                            color: '#f97373',
+                            font: { size: 11 },
+                            callback: function(value) {
+                                return (value / 1000).toFixed(0) + 'k';
+                            }
+                        },
+                        title: {
+                            display: true,
+                            text: 'cons_mass',
+                            color: '#f97373',
+                            font: { size: 13, weight: '400' }
+                        }
+                    }
+                },
+                elements: {
+                    line: {
+                        borderJoinStyle: 'round'
+                    }
+                },
+                animation: {
+                    duration: 800,
+                    easing: 'easeOutQuart'
+                }
+            },
+            plugins: [ChartDataLabels] // 显式注册
+        });
+    </script>
+
+</body>
+</html>

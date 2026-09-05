@@ -1,0 +1,50 @@
+﻿C:\Python312\python.exe : [Tokenizer] 加载Qwen2.5 tokenizer: d:\AetherMind-Nano3\models_local\Qwen\Qwen2___5-0___5B
+At line:15 char:2463
++ ... pgrep\bin'; C:\Python312\python.exe d:\AetherMind-Nano3\verification\ ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ([Tokenizer] 加载Q...wen2___5-0___5B:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+[Tokenizer] vocab_size=151643, pad=151643, eos=151643
+[Load] 读取检查点: d:/AetherMind-Nano3/checkpoints_v4_fixed/v4_checkpoint_20000_phaseG_final.pt
+[Load] 加载Qwen2.5 tokenizer...
+[Load] 训练步数: 20000, 阶段: G, 架构: train
+[Load] vocab_size=151680, d_model=384, n_layers=6, max_seq_len=512
+[Load] 载入 568 张量, 跳过 0 个
+[Verify] 注意力类=PheromoneThermoAttention | 相对核tau_rel=无 | 绝对τ(3D)=有
+[Load] train架构推理: 清空绝对 τ/C（绝对坐标偏置不可跨会话迁移）
+[Load] 演化统计(实时): tau_conc=1.000, cons_mass=0.000, 固化轮数=0
+[Device] cuda
+[Model] 参数量: 101,090,592 (385.6 MB)
+
+[诊断] 载入 8 个样本
+======================================================================
+
+[测试1] 训练保真: pad=512, 随机task_id, bf16 —— 模型在自己训练数据上的真实损失
+  样本0: 训练保真损失 = 7.3349 (S=134)
+  样本1: 训练保真损失 = 7.1335 (S=136)
+  样本2: 训练保真损失 = 7.1884 (S=113)
+  样本3: 训练保真损失 = 7.9870 (S=168)
+  样本4: 训练保真损失 = 7.9865 (S=245)
+  样本5: 训练保真损失 = 8.1461 (S=122)
+  样本6: 训练保真损失 = 7.3077 (S=134)
+  样本7: 训练保真损失 = 7.9481 (S=97)
+  >> 平均: 7.6290 nats (随机基线 ln(151680)≈11.93)
+
+[测试2] task_id 敏感性 (pad=512, bf16)
+  task_id= 0: 损失 = 7.3356
+  task_id= 3: 损失 = 7.3356
+  task_id= 7: 损失 = 7.3353
+  task_id=15: 损失 = 7.3359
+
+[测试3] 未padding短序列 (推理真实场景, task_id=0, fp32)
+  >> 平均: 7.6835 nats
+
+[测试4] 未来泄漏检查: 打乱答案后问题部分损失变化 (pad=512)
+Traceback (most recent call last):
+  File "d:\AetherMind-Nano3\verification\diagnose_causal_leak.py", line 139, in <module>
+    main()
+  File "d:\AetherMind-Nano3\verification\diagnose_causal_leak.py", line 123, in main
+    pos = pos & valid_pos.bool()
+          ~~~~^~~~~~~~~~~~~~~~~~
+RuntimeError: The size of tensor a (511) must match the size of tensor b (133) at non-singleton dimension 0
